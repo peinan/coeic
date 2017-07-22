@@ -107,7 +107,11 @@ class OcrTexts:
     print(json.dumps(ocred_texts, ensure_ascii=False))
 
 
-if __name__ == '__main__':
+def sample():
   json_fp = 'dummy_extracted_balloons.json'
   ocr = OcrTexts(json_fp)
   ocr.main()
+
+
+if __name__ == '__main__':
+  sample()
