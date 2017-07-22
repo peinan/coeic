@@ -8,6 +8,7 @@
 import cv2
 from PIL import Image
 import numpy as np
+import json
 
 class FrameSplitter:
   def __init__(self, upload_img_fp):
@@ -15,34 +16,53 @@ class FrameSplitter:
 
 
   def main(self):
-    frames = self.detect_frames()
-    result = self.crop_frames()
+    frame_positions = self.detect_frames()
+    cropped_result = self.crop_frames(frame_positions)
+
+    self.output_result(cropped_result)
 
 
   def detect_frames(self):
-    gray_img = self.load_gray_img(self.upload_img_fp)
-    result_img = gray_img
+    gray_img, result_img = self.load_img_set()
+    # ===> DEBUG
+    # print("[DEBUG] load image: {}".format(self.upload_img_fp))
+    # plt.imshow(gray_img, cmap='Greys_r')
+    # plt.show()
+    # <===
 
     # thresholding
     ret, thresh = cv2.threshold(gray_img, 80, 255, cv2.THRESH_BINARY_INV)
     # contours
-    _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv2.findContours(thresh,\
+                                              cv2.RETR_TREE,\
+                                              cv2.CHAIN_APPROX_SIMPLE)
+    # ===> DEBUG
+    # rrr = cv2.imread(self.upload_img_fp)
+    # for cnt in contours:
+    #   cv2.drawContours(rrr, [cnt], -1, 255, 3)
+    # plt.imshow(rrr)
+    # plt.show()
+    # <===
     # convex hull
     for c in contours:
       hull = cv2.convexHull(c)
       cv2.drawContours(result_img, [hull], -1, 255, -1)
 
+    # ===> DEBUG
+    # plt.imshow(result_img)
+    # plt.show()
+    # <===
     # detect rectangles
     frames = self.detect_shapes(result_img)
 
     return frames
 
 
-  def load_gray_img(self, img_fp):
-    img = cv2.imread(img_fp)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  def load_img_set(self):
+    img = cv2.imread(self.upload_img_fp)
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    return img
+    return (gray_img, img)
 
 
   def detect_shapes(self, img):
@@ -50,13 +70,61 @@ class FrameSplitter:
     retval, thresh = cv2.threshold(img, 127, 255, 1)
     _, contours, hierarchy = cv2.findContours(thresh, 1, 2)
 
-    frames = []
+    frame_positions = []
     for c in contours:
       approx = cv2.approxPolyDP(c, 0.01*cv2.arcLength(c, True), True)
-      frames.append(approx)
+      try:
+        frame_position = np.array(approx).reshape(4, 2)
+      except ValueError:
+        pass
+      frame_positions.append(frame_position)
 
-    return frames
+    return frame_positions
 
 
-  def crop_frames(self):
-    pass
+  def crop_frames(self, frame_positions):
+    cropped_results = []
+    rev_pos = list(reversed(frame_positions))
+    orig_img = Image.open(self.upload_img_fp)
+    for i in range(len(frame_positions)):
+      box = self.generate_box(rev_pos[i])
+      cropped_img = orig_img.crop(box)
+
+      frame_img_fp = "sample_data/upload_img_01/frames/{:02d}.png".format(i+1)
+      self.write_img(cropped_img, frame_img_fp)
+      cropped_results.append(frame_img_fp)
+
+    return cropped_results
+
+
+  def generate_box(self, frame_position):
+    postion = [ (xy[0], xy[1]) for xy in frame_position ]
+    x_sorted_position = sorted(postion, key=lambda x: x[0])
+    left_upper  = min(x_sorted_position[:2], key=lambda x: x[1])
+    right_lower = max(x_sorted_position[2:], key=lambda x: x[1])
+
+    return (left_upper[0], left_upper[1], right_lower[0], right_lower[1])
+
+
+  def write_img(self, cropped_img, out_fp):
+    cropped_img.save(out_fp, 'PNG')
+
+
+  def output_result(self, cropped_result):
+    print(
+      json.dumps({
+        'upload_img_path': self.upload_img_fp,
+        'splited_frames': cropped_result
+      })
+    )
+
+
+def sample():
+  upload_img_fp = 'sample_data/upload_img_01/original.png'
+  frame_splitter = FrameSplitter(upload_img_fp)
+  frame_splitter.main()
+
+
+if __name__ == '__main__':
+  sample()
+
