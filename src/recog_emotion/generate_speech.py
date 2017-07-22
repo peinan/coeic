@@ -12,9 +12,11 @@ def generate_speech(ocr_texts):
     databodys, response, wav, texts = [], [], [], []
 
     for n in range(0,len(ocr_texts["splited_frames"])):
+        #渡されたjsonから、セリフを抜き出して、textsに格納していく
         texts.append(ocr_texts["splited_frames"][n]["extracted_balloons"][0]["texts"]["text"])
 
     for text in texts:
+        #rospeexに渡す用のデータ作成
         databody = {"method": "speak",
                     "params": ["1.1",
                             {"language": "ja", "text":text,
@@ -27,19 +29,24 @@ def generate_speech(ocr_texts):
 
         i = i + 1
 
-    #ディレクトリ作成
+    #./voice/　のディレクトリ数をfilesに代入
     files = len(os.listdir("./voice"))
+    #新ディレクトリの数字
     new_dir_num = str(files + 1)
+    #新ディレクトリのパス
     new_dir = "./voice/" + new_dir_num
+    #新ディレクトリ作成
     os.mkdir(new_dir)
 
     for n in range(0, len(wav)):
+        #新ディレクトリの中に、渡されたセリフの数だけ、.wavファイルを作成
         with open(new_dir + "/" + str(n) + ".wav", "wb") as f:
             f.write(wav[n])
 
 
 
 if __name__ == "__main__":
+    #テストjson
     ocr_texts = {
         "upload_img_path": "IMG_PATH",
         "splited_frames": [
