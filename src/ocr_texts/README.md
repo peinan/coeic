@@ -57,7 +57,7 @@ ocr_texts = {
               "left_upper": [x, y],
               "right_bottom": [x, y],
             }
-          ]
+          }
         },
         ...
       ]
