@@ -102,3 +102,7 @@ ENV/
 
 # Intellij IDEA
 .idea/
+
+# Vim
+.swp
+.swo

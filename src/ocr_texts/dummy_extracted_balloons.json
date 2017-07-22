@@ -1,0 +1,13 @@
+{
+  "upload_img_path": "dummy_img_path",
+  "splited_frames": [
+    {
+      "frame_img": "dummy_frame_img_01",
+      "extracted_balloons": [
+        "dummy_balloon_img1",
+        "dummy_balloon_img2"
+      ]
+    }
+  ]
+}
+
