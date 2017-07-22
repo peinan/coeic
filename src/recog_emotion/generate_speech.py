@@ -8,25 +8,28 @@ URL = "http://rospeex.nict.go.jp/nauth_json/jsServices/VoiceTraSS"
 
 def generate_speech(messages):
 
-    databodys = []
+    databodys, response, wav = [], [], []
+    i = 0
     for message in messages:
         databody = {"method": "speak",
                     "params": ["1.1",
                             {"language": "ja", "text":message,
                                 "voiceType": "F117", "audioType": "audio/x-wav"}]}
-        databodys.append(databody)
 
-    response = requests.post(URL, data=json.dumps(databodys))
-    tmp = json.loads(response.text)
-    wav = base64.decodebytes(tmp["result"]["audio"].encode("utf-8"))
+        response.append(requests.post(URL, data=json.dumps(databody)))
+
+        tmp = json.loads(response[i].text)
+        wav.append(base64.decodebytes(tmp["result"]["audio"].encode("utf-8")))
+
+        i = i + 1
 
 
-    for i in range(0, len(message)):
-        with open(str(i) + ".wav", "wb") as f:
-            f.write(wav)
+    for n in range(0, len(wav)):
+        with open(str(n) + ".wav", "wb") as f:
+            f.write(wav[n])
 
 
 
 if __name__ == "__main__":
-    messages = ["あああああ", "いいいいいい", "うううううううう"]
+    messages = ["いつまでも to you　", "いいいいいい", "うううううううう"]
     generate_speech(messages)
