@@ -258,11 +258,11 @@ app.get("/api/processedImg/:id", function (req, res) {
         result: processed_img_urls
       });
     } else {
-      res.send('failure', "指定されたidの処理済み画像はありません: " + id);
+      res.send(createMessage('failure', "指定されたidの処理済み画像はありません: " + id));
     }
   }).catch((e) => {
     console.log(e);
-    res.send('failure', '画像取得に失敗しました');
+    res.send(createMessage('failure', '画像取得に失敗しました'));
   });
 });
 
@@ -283,7 +283,7 @@ app.get("/:id/frames/:name", function (req, res) {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      res.send('failure', '処理画像取得に失敗しました');
+      res.send(createMessage('failure', '処理画像取得に失敗しました'));
     }
   });
 });
@@ -312,11 +312,11 @@ app.get("/api/voice/:id", function (req, res) {
         result: flatten(voice_urls)
       });
     } else {
-      res.send('failure', "指定されたidの音声はありません: " + id);
+      res.send(createMessage('failure', "指定されたidの音声はありません: " + id));
     }
   }).catch((e) => {
     console.log(e);
-    res.send('failure', '音声取得に失敗しました');
+    res.send(createMessage('failure', '音声取得に失敗しました'));
   });
 });
 
@@ -338,7 +338,7 @@ app.get("/:id/voice/:name", function (req, res) {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      res.send('failure', '音声取得に失敗しました');
+      res.send(createMessage('failure', '音声取得に失敗しました'));
     }
   });
 });
@@ -350,9 +350,9 @@ app.get("/api/truncate", function (req, res) {
   db.truncate().then(function () {
     const message = 'succeeded to truncate table';
     console.log(message);
-    res.send('success', message);
+    res.send(createMessage('success', message));
   }).catch(function (e) {
     console.log(e);
-    res.send('failure', 'failed to truncate table: ' + e);
+    res.send(createMessage('failure', 'failed to truncate table: ' + e));
   })
 });
