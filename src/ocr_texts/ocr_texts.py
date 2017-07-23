@@ -17,21 +17,25 @@ try:
   from google.cloud import vision
 except:
   print(json.dumps(
-    {'job_name': '[Load modules: load modules]',
-      'status': 'FAILED',
-      'message': traceback.format_exc()}
+    {'job_result':
+      {'job_name': '[OcrTexts: load modules]',
+        'status': 'FAILED',
+        'message': traceback.format_exc()}
+    }
   ))
   sys.exit(-1)
 
 
 class OcrTexts:
-  CURRENT_DIR     = os.getcwd()
   FRAME_IMG_DIR   = 'frames'
   BALLOON_IMG_DIR = 'balloons'
 
 
-  def __init__(self, in_json_fp):
-    self.extracted_balloons = self.parse_input(in_json_fp)
+  def __init__(self, in_json, coeic_root_path):
+    self.extracted_balloons = self.parse_input(in_json)
+    self.upload_img_dir = self.extracted_balloons['upload_img_path']\
+                            .rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
     # print('[DEBUG] INPUT:', self.extracted_balloons)
 
 
@@ -44,8 +48,9 @@ class OcrTexts:
 
     try:
       img_root_dir = os.path.split(self.extracted_balloons['upload_img_path'])[0]
-      frames = self.extracted_balloons['splited_frames']
+      frames = self.extracted_balloons['splitted_frames']
     except:
+      print(self.extracted_balloons)
       self.output_error('load data', traceback.format_exc())
 
     frame_results = []
@@ -53,8 +58,9 @@ class OcrTexts:
       for frame in frames:
         balloon_results = []
         for balloon in frame['extracted_balloons']:
-          balloon_fp = os.path.join(self.CURRENT_DIR,\
-                                    img_root_dir,\
+          balloon_fp = os.path.join(self.coeic_root_path,\
+                                    'data',
+                                    self.upload_img_dir,\
                                     self.BALLOON_IMG_DIR,\
                                     balloon)
           ocr_result = self.ocr_image(balloon_fp)
@@ -73,21 +79,23 @@ class OcrTexts:
       self.output_error('ocr all images', traceback.format_exc())
 
     ocred_texts = self.extracted_balloons
-    ocred_texts['splited_frames'] = frame_results
+    ocred_texts['splitted_frames'] = frame_results
 
     self.output_result(ocred_texts)
 
 
-  def parse_input(self, in_json_fp):
+  def parse_input(self, in_json):
     try:
-      in_json = json.load(open(in_json_fp, 'r'))
+      extracted_balloons = json.loads(in_json)
     except:
-      self.error_handling('parse_input', traceback.format_exc())
+      self.output_error('parse_input', traceback.format_exc())
 
-    return in_json
+    return extracted_balloons
 
 
   def certify_google_api(self):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] =\
+        os.path.join(self.coeic_root_path, 'conf/gcp_setting.json')
     self.credentials = GoogleCredentials.get_application_default()
     self.vision_client = vision.Client()
 
@@ -100,7 +108,7 @@ class OcrTexts:
         img = self.vision_client.image(content=content)
         texts = img.detect_text()
     except:
-      self.output_result('ocr image', traceback.format_exc())
+      self.output_error('ocr image', traceback.format_exc())
 
     return texts
 
@@ -125,7 +133,13 @@ class OcrTexts:
 
 
   def output_result(self, ocred_texts):
-    # print('RESULT\n======')
+    job_result = {
+        'job_name': '[{}: {}]'.format(self.__class__.__name__,\
+                                      os.path.split(__file__)[-1]),
+        'status': 'SUCCEEDED',
+        'message': ''
+    }
+    ocred_texts['job_result'] = job_result
     try:
       print(json.dumps(ocred_texts, ensure_ascii=False))
     except:
@@ -139,16 +153,18 @@ class OcrTexts:
       'status': 'FAILED',
       'message': message
     }
+    result = {'job_result': error}
     # json serialize
-    print(json.dumps(error, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False))
     sys.exit(-1)
 
 
-def sample():
-  json_fp = 'dummy_extracted_balloons.json'
-  ocr = OcrTexts(json_fp)
+def main():
+  in_json = sys.argv[1]
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  ocr = OcrTexts(in_json, coeic_root_path)
   ocr.main()
 
 
 if __name__ == '__main__':
-  sample()
+  main()

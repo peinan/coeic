@@ -14,25 +14,26 @@ try:
   import numpy as np
 except:
   print(json.dumps(
-    {'job_name': '[Load modules: load modules]',
-      'status': 'FAILED',
-      'message': traceback.format_exc()}
+    {'job_result':
+      {'job_name': '[OcrTexts: load modules]',
+        'status': 'FAILED',
+        'message': traceback.format_exc()}
+    }
   ))
   sys.exit(-1)
 
 class FrameSplitter:
-  def __init__(self, upload_img_fp):
+  def __init__(self, upload_img_fp, coeic_root_path):
     self.upload_img_fp = upload_img_fp
+    self.upload_img_dir = upload_img_fp.rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
 
 
   def main(self):
-    try:
-      frame_positions = self.detect_frames()
-      cropped_result = self.crop_frames(frame_positions)
+    frame_positions = self.detect_frames()
+    cropped_result = self.crop_frames(frame_positions)
 
-      self.output_result(cropped_result)
-    except:
-      self.output_error('extract all frames', traceback.format_exc())
+    self.output_result(cropped_result)
 
 
   def detect_frames(self):
@@ -101,10 +102,7 @@ class FrameSplitter:
     frame_positions = []
     for c in contours:
       approx = cv2.approxPolyDP(c, 0.01*cv2.arcLength(c, True), True)
-      try:
-        frame_position = np.array(approx).reshape(4, 2)
-      except ValueError:
-        pass
+      frame_position = np.array(approx).reshape(4, 2)
       frame_positions.append(frame_position)
 
     return frame_positions
@@ -118,9 +116,14 @@ class FrameSplitter:
       box = self.generate_box(rev_pos[i])
       cropped_img = orig_img.crop(box)
 
-      frame_img_fp = "sample_data/upload_img_01/frames/{:02d}.png".format(i+1)
+      img_name = '{}.png'.format(i+1)
+      frame_img_fp = os.path.join(self.coeic_root_path,\
+                                  'data',\
+                                  self.upload_img_dir,\
+                                  'frames',\
+                                  img_name)
       self.write_img(cropped_img, frame_img_fp)
-      cropped_results.append(frame_img_fp)
+      cropped_results.append(img_name)
 
     return cropped_results
 
@@ -142,10 +145,17 @@ class FrameSplitter:
 
 
   def output_result(self, cropped_result):
+    job_result = {
+        'job_name': '[{}: {}]'.format(self.__class__.__name__,\
+                                      os.path.split(__file__)[-1]),
+        'status': 'SUCCEEDED',
+        'message': ''
+    }
     print(
       json.dumps({
+        'job_result': job_result,
         'upload_img_path': self.upload_img_fp,
-        'splited_frames': cropped_result
+        'splitted_frames': cropped_result
       })
     )
 
@@ -157,17 +167,19 @@ class FrameSplitter:
       'status': 'FAILED',
       'message': message
     }
+    result = {'job_result': error}
     # json serialize
-    print(json.dumps(error, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False))
     sys.exit(-1)
 
 
-def sample():
-  upload_img_fp = 'sample_data/upload_img_01/original.png'
-  frame_splitter = FrameSplitter(upload_img_fp)
+def main():
+  upload_img_fp = sys.argv[1]
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  frame_splitter = FrameSplitter(upload_img_fp, coeic_root_path)
   frame_splitter.main()
 
 
 if __name__ == '__main__':
-  sample()
+  main()
 
