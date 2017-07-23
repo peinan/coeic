@@ -25,11 +25,6 @@ const uploaded_img_path_url = base_url + uploaded_img_relative_path;
 const processed_img_path_url = base_url + processed_img_relative_path;
 const voice_path_url = base_url + voice_relative_path;
 
-// それぞれの情報を問い合わせるためのAPIのパス
-const uploaded_img_api_url = base_url + "api/uploadedImg/";
-const processed_img_api_url = base_url + "api/processedImg/";
-const voice_api_url = base_url + "api/voice/";
-
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
