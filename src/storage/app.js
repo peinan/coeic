@@ -10,7 +10,9 @@ const db = require('./db');
 const storage_root = process.argv[2].endsWith("/") ? process.argv[2] : process.argv[2] + "/";
 
 // 一時保存ディレクトリ名
-const tmp_dir = storage_root + 'tmp/';
+const tmp_dir = storage_root + Date.now().toString() + '/';
+const mkdirp = require('mkdirp');
+const rmdir = require('rmdir');
 
 // APIのベースURL
 const base_url = "http://104.155.222.216:5000/";
@@ -30,6 +32,12 @@ app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Access-Control-Max-Age', '86400');
+  next();
+});
+app.use((req, res, next) => {
+  mkdirp(tmp_dir, (e) => {
+    if (e) console.log(e);
+  });
   next();
 });
 
@@ -89,29 +97,40 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
       // DBからID取得
       db.selectMulti(1).then((results) => {
         const result = results[0];
+        const id_dir = storage_root + result.id;
+        // すでにid名のディレクトリがある場合は削除
+        const directoryExists = require('directory-exists');
+        if (directoryExists.sync(id_dir)) {
+          rmdir(id_dir, (err) => {
+            if (err) console.log(err);
+          })
+        }
         // 一時保存ディレクトリをid名に移動
         const mv = require('mv');
-        mv(tmp_dir, storage_root + result.id, (err) => {
-          console.log('mv failed: ' + err);
-          res.send(createMessage('failure', 'ディレクトリの移動に失敗'))
+        mv(tmp_dir, id_dir, {mkdirp: true},  (err) => {
+          if (err) {
+            console.log(err);
+            res.send(createMessage('failure', 'ディレクトリの移動に失敗'))
+          } else {
+            // DB情報を更新
+            db.update(result.id, db.STATUS_TODO, '').then(() => {
+              // 追加した最新のデータを返す
+              res.send({
+                status: "success",
+                result: {
+                  id: result.id,
+                  url: base_url + result.id + "/" + filename,
+                  status: db.STATUS_TODO,
+                  created_at: result.created_at,
+                  updated_at: result.updated_at
+                }
+              })
+            }).catch((e) => {
+              console.log(e);
+              res.send(createMessage('failure', 'DBの初回情報更新に失敗'))
+            });
+          }
         });
-        // DB情報を更新
-        db.update(result.id, db.STATUS_TODO, '').then(() => {
-          // 追加した最新のデータを返す
-          res.send({
-            status: "success",
-            result: {
-              id: result.id,
-              url: base_url + result.id + "/" + filename,
-              status: db.STATUS_TODO,
-              created_at: result.created_at,
-              updated_at: result.updated_at
-            }
-          })
-        }).catch((e) => {
-          console.log(e);
-          res.send(createMessage('failure', 'DBの初回情報更新に失敗'))
-        })
       }).catch((e) => {
         console.log(e);
         res.send(createMessage('failure', 'DBからの最新情報取得に失敗'))
