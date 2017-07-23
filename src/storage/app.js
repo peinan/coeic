@@ -98,7 +98,7 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
 
 
 /**
- * get all of uploaded images
+ * get all of uploaded images info
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg", function (req, res) {
@@ -138,7 +138,7 @@ app.get("/api/uploadedImg", function (req, res) {
 });
 
 /**
- * get the specified uploaded image
+ * get the specified uploaded image info
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg/:id", function (req, res, next) {
@@ -182,6 +182,32 @@ app.get("/api/uploadedImg/:id", function (req, res, next) {
 });
 
 /**
+ * get the specified uploaded image data
+ */
+app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
+  const fileExists = require('file-exists');
+
+  const options = {
+    root: uploaded_img_root
+  };
+
+  const filename = req.params.name;
+
+  fileExists(filename, options, function (err, exists) {
+    if (!err && exists) {
+      res.sendFile(filename, options);
+    } else {
+      res.send({
+        status: "failure",
+        result: {
+          message: "画像取得に失敗しました"
+        }
+      });
+    }
+  });
+});
+
+/**
  * find processed images
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
@@ -217,7 +243,7 @@ app.get("/api/processedImg/:id", function (req, res) {
  * get the processed image
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
-app.get(processed_img_relative_path + ":id/:name", function (req, res) {
+app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
 
   const fileExists = require('file-exists');
 
@@ -277,7 +303,7 @@ app.get("/api/voice/:id", function (req, res) {
  * get the voice file
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
-app.get(voice_relative_path + ":id/:name", function (req, res) {
+app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
 
   const fileExists = require('file-exists');
 
