@@ -65,7 +65,7 @@ cron.schedule('*/10 * * * * *', function(){
 
             // DBの情報を更新する
             console.log("update info of " + to_be_processed.filename);
-            db.updateByName(to_be_processed.filename, progress, message).then(function (results) {
+            db.updateByName(to_be_processed.filename, progress, message).then(function () {
               console.log("DB update succeeded: " + progress);
             }).catch(function (err) {
               console.log("DB update failed: " + err);
@@ -73,7 +73,7 @@ cron.schedule('*/10 * * * * *', function(){
           } catch (e) {
             console.log("data parse failed: " + e);
             console.log("update info of " + to_be_processed.filename);
-            db.updateByName(to_be_processed.filename, db.STATUS_FAILED, e.stack).then(function (results) {
+            db.updateByName(to_be_processed.filename, db.STATUS_FAILED, e.stack).then(function () {
               console.log("DB update succeeded: " + db.STATUS_FAILED);
             }).catch(function (err) {
               console.log("DB update failed: " + err);
@@ -82,7 +82,7 @@ cron.schedule('*/10 * * * * *', function(){
         } else {
           console.log("python script cmd error: " + err);
           console.log("update info of " + to_be_processed.filename);
-          db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err.toString()).then(function (results) {
+          db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err.toString()).then(function () {
             console.log("DB update succeeded: " + db.STATUS_FAILED);
           }).catch(function (err) {
             console.log("DB update failed: " + err);

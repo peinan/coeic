@@ -158,7 +158,7 @@ app.get("/api/uploadedImg", function (req, res) {
  * get the specified uploaded image info
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
-app.get("/api/uploadedImg/:id", function (req, res, next) {
+app.get("/api/uploadedImg/:id", function (req, res) {
   try {
     // DBから画像情報取得
     db.selectById(req.params.id).then(function (results) {
