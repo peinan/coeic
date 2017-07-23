@@ -11,7 +11,8 @@ from ocr_texts import OcrTexts
 
 def sample():
   json_fp = 'dummy_extracted_balloons.json'
-  ocr = OcrTexts(json_fp)
+  json_str = open(json_fp).read()
+  ocr = OcrTexts(json_str)
   ocr.main()
 
 

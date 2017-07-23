@@ -6,6 +6,10 @@
 # Created at: 2017-07-23
 
 
+import sys
+import subprocess
+
+
 class ModuleManager:
   def __init__(self, upload_img_fp):
     self.upload_img_fp = upload_img_fp
@@ -18,29 +22,55 @@ class ModuleManager:
     result_recog    = self.recog_emotion(result_ocr)
     result_generate = self.generate_speech(result_recog)
 
+    self.output_result(result_generate)
+
 
   def split_into_frames(self):
-    pass
+    script = self.build_script('split_into_frames', self.upload_img_fp)
+    result = self.run_shell_script(script)
+
+    return result
 
 
   def extract_balloons(self, in_json):
-    pass
+    script = self.build_script('extract_balloons', in_json)
+    result = self.run_shell_script(script)
+
+    return result
 
 
   def orc_texts(self, in_json):
-    pass
+    script = self.build_script('ocr_texts', in_json)
+    result = self.run_shell_script(script)
+
+    return result
 
 
   def recog_emotion(self, in_json):
-    pass
+    script = self.build_script('recog_emotion', in_json)
+    result = self.run_shell_script(script)
+
+    return result
 
 
   def generate_speech(self, in_json):
-    pass
+    script = self.build_script('generate_speech', in_json)
+    result = self.run_shell_script(script)
+
+    return result
 
 
-  def output_result(self):
-    pass
+  def build_script(self, method_name, arg):
+    return "python {method_name}/{method_name}.py '{arg}'"\
+        .format(method_name=method_name, arg=arg)
+
+
+  def run_shell_script(self, script):
+    return subprocess.check_output(script, shell=True, universal_newlines=True)
+
+
+  def output_result(self, result):
+    print(result)
 
 
   def output_error(self, method_name, message):
@@ -61,6 +91,6 @@ def main():
   module_manager.main()
 
 
-
 if __name__ == '__main__':
+  sys.path.append(os.path.abs(__file__)).rsplit('/', 2)
   main()

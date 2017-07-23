@@ -100,7 +100,7 @@ class OcrTexts:
         img = self.vision_client.image(content=content)
         texts = img.detect_text()
     except:
-      self.output_result('ocr image', traceback.format_exc())
+      self.output_error('ocr image', traceback.format_exc())
 
     return texts
 
