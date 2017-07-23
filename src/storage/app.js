@@ -4,6 +4,8 @@ if (process.argv.length < 3) {
   throw Error("Usage: " + process.argv.join(" ") + " <storage_root_path>")
 }
 
+const db = require('./db');
+
 // 実際に保存されるストレージのルート
 const storage_root = process.argv[2].endsWith("/") ? process.argv[2] : process.argv[2] + "/";
 
@@ -53,8 +55,6 @@ app.options('*', function (req, res) {
 const server = app.listen(5000, function () {
   console.log("Node.js is listening to PORT:" + server.address().port);
 });
-
-const db = require('./db');
 
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -340,51 +340,71 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
   });
 });
 
+
+
 /**
- * 処理済みの画像の情報を更新
+ * 処理をキックするcron job
  */
-app.post("/api/processedData", function (req, res, next) {
 
-  const body = req.body;
-  const path = require('path');
+const cron = require('node-cron');
+const cmd  = require('node-cmd');
 
-  try {
-    // 成功か失敗か判定
-    const status = body['status'];
-    var progress = db.STATUS_DONE;
-    var message = '';
-    if (status !== 'succeeded') {
-      progress = db.STATUS_FAILED;
-      message = body['message'];
+cron.schedule('*/10 * * * * *', function(){
+  console.log('start job : running a task every 10 seconds');
+
+  // DBに接続して次に処理すべき画像があるかチェックし，あれば処理を起動
+  db.selectNext().then(function (results) {
+    if (results.length === 0) {
+      return;
     }
 
-    // bodyから元画像ファイルの名前を取得
-    const upload_img_name = path.basename(body['upload_img_path']);
+    const result = results[0];
 
-    // DBから元画像ファイルのidを取得して，その情報を更新する
-    db.updateByName(upload_img_name, progress, message).then(
-      res.send({
-        status: 'success',
-        result: {
-          message: 'information update succeeded'
-        }
-      })
-    ).catch(function (err) {
-      console.log(err);
-      res.send({
-        status: 'failure',
-        result: {
-          message: 'information update failed'
-        }
-      })
+    // DBを更新する
+    db.update(result.id, db.STATUS_DOING, result.message).then(function (results) {
+      console.log("DB update succeeded. result: " + results.toString());
+    }).catch(function (err) {
+      console.log("DB update failed. reason: " + err.toString());
     });
-  } catch (e) {
-    console.log(e);
-    res.send({
-      status: "failure",
-      result: {
-        message: 'information update failed'
-      }
-    });
-  }
+
+    // パスを生成
+    const img_path = uploaded_img_root + result.filename;
+    // run python script
+    cmd.get('/path/to/python python_script.py ' + img_path,
+      function (out, err, stderr) {
+        if (!err) {
+          console.log("data from python script " + out);
+
+          try {
+            const data = JSON.parse(out);
+            const path = require('path');
+
+            // 成功か失敗か判定
+            const status = data.status;
+            var progress = db.STATUS_DONE;
+            var message = '';
+            if (status !== 'succeeded') {
+              progress = db.STATUS_FAILED;
+              message = data.message;
+            }
+
+            // bodyから元画像ファイルの名前を取得
+            const upload_img_name = path.basename(data.upload_img_path);
+
+            // DBから元画像ファイルのidを取得して，その情報を更新する
+            db.updateByName(upload_img_name, progress, message).then(function (results) {
+              console.log("DB update succeeded: " + results);
+            }).catch(function (err) {
+              console.log("DB update failed: " + err);
+            });
+          } catch (e) {
+            console.log("data parse failed: " + e);
+          }
+        } else {
+          console.log("python script cmd error: " + err);
+        }
+      });
+  }).catch(function (err) {
+    console.log("DB check failed: " + err);
+  })
 });
