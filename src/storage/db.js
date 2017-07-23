@@ -3,10 +3,10 @@
 const mysql = require('mysql');
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: 'localhost',
+  host: '35.188.103.34',
   user: 'root',
-  password: '',
-  database: 'sample_db'
+  password: 'hackday14_coeic',
+  database: 'coeic-db'
 });
 
 /**
