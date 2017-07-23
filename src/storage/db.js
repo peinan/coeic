@@ -10,6 +10,13 @@ const pool = mysql.createPool({
   password: 'hackday14_coeic',
   database: 'coeic_db'
 });
+// const pool = mysql.createPool({
+//   connectionLimit: 10,
+//   host: 'localhost',
+//   user: 'root',
+//   password: '',
+//   database: 'sample_db'
+// });
 
 /**
  * create table if not exists
@@ -34,7 +41,7 @@ pool.getConnection(function (err, connection) {
 const STATUS_TODO = 'TODO';
 const STATUS_DOING = 'DOING';
 const STATUS_DONE = 'DONE';
-const STATUS_FAILED = 'TODO';
+const STATUS_FAILED = 'FAILED';
 
 module.exports = {
 
