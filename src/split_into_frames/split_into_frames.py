@@ -116,7 +116,7 @@ class FrameSplitter:
       box = self.generate_box(rev_pos[i])
       cropped_img = orig_img.crop(box)
 
-      img_name = '{:02d}.png'.format(i+1)
+      img_name = '{}.png'.format(i+1)
       frame_img_fp = os.path.join(self.coeic_root_path,\
                                   'data',\
                                   self.upload_img_dir,\

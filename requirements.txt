@@ -1,7 +1,8 @@
 six
+sox
 opencv-python
 Pillow
 google-api-python-client
 gcloud
-gle-cloud-vision
+google-cloud-vision
 

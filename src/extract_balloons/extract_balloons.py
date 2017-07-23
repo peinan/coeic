@@ -53,7 +53,7 @@ class BalloonExtractor:
                                   self.upload_img_dir,\
                                   'frames',\
                                   frame_img_fn)
-      balloon_img_fn = "{}_01.png".format(frame_img_fn.split('.')[0])
+      balloon_img_fn = "{}-1.png".format(frame_img_fn.split('.')[0])
       balloon_img_fp = os.path.join(self.coeic_root_path,\
                                   'data',\
                                   self.upload_img_dir,\
