@@ -54,6 +54,7 @@ const upload = multer({storage: storage});
  * https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_POST:uploadedImg
  */
 app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
+  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   try {
@@ -102,6 +103,7 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg", function (req, res) {
+  res.header('Access-Control-Allow-Origin','*');
   try {
     const results = typeof req.body["results"] !== 'undefined' ? req.body["results"] : 0;
 
@@ -142,6 +144,7 @@ app.get("/api/uploadedImg", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg/:id", function (req, res, next) {
+  res.header('Access-Control-Allow-Origin','*');
   try {
     // DBから画像情報取得
     db.select(req.params.id).then(function (results) {
@@ -185,6 +188,7 @@ app.get("/api/uploadedImg/:id", function (req, res, next) {
  * get the specified uploaded image data
  */
 app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
+  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
@@ -212,7 +216,7 @@ app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
 app.get("/api/processedImg/:id", function (req, res) {
-
+  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   var result;
@@ -244,7 +248,7 @@ app.get("/api/processedImg/:id", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
 app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
-
+  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
@@ -272,7 +276,7 @@ app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
 app.get("/api/voice/:id", function (req, res) {
-
+  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   var result;
@@ -304,7 +308,7 @@ app.get("/api/voice/:id", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
 app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
-
+  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
