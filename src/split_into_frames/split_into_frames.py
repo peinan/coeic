@@ -149,8 +149,15 @@ class FrameSplitter:
 
 
   def output_result(self, cropped_result):
+    job_result = {
+        'job_name': '[{}: {}]'.format(self.__class__.__name__,\
+                                      os.path.split(__file__)[-1]),
+        'status': 'SUCCEEDED',
+        'message': ''
+    }
     print(
       json.dumps({
+        'job_result': job_result,
         'upload_img_path': self.upload_img_fp,
         'splitted_frames': cropped_result
       })

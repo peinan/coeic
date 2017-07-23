@@ -24,7 +24,7 @@ class ModuleManager:
     result_recog    = self.recog_emotion(result_ocr)
     # result_generate = self.generate_speech(result_recog)
 
-    result = result_ocr
+    result = result_recog
 
     self.output_result(result)
 
@@ -102,3 +102,4 @@ def main():
 if __name__ == '__main__':
   sys.path.append(os.path.abspath(__file__).rsplit('/', 2))
   main()
+

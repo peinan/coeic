@@ -129,7 +129,13 @@ class OcrTexts:
 
 
   def output_result(self, ocred_texts):
-    # print('RESULT\n======')
+    job_result = {
+        'job_name': '[{}: {}]'.format(self.__class__.__name__,\
+                                      os.path.split(__file__)[-1]),
+        'status': 'SUCCEEDED',
+        'message': ''
+    }
+    ocred_texts['job_result'] = job_result
     try:
       print(json.dumps(ocred_texts, ensure_ascii=False))
     except:

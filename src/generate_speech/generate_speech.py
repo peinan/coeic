@@ -41,28 +41,13 @@ class SpeechGenerator:
     #合計フレーム数
     self.all_frames_number = len(ocr_text["splited_frames"])
     #フレーム数の配列
-    #self.array_all_frames = list(range(self.all_frames_number))
     self.array_all_frames = [x for x in range(self.all_frames_number)]
-
-    #for frame in self.array_all_frames:
-    #    self.s = len(ocr_text["splited_frames"][frame]["extracted_balloons"])
-    #    #self.array_all_balloons.append(self.s)
-    #    self.array_all_balloons = [x for x in self.s]
 
     self.array_all_balloons = [len(ocr_text["splited_frames"][x]["extracted_balloons"]) for x in self.array_all_frames]
 
 
-    #[1−1, 1-2, 2-1, 2-2...]の配列の作成
-    #for n in range(len(ocr_text["splited_frames"])):
-    #    for k in range(self.array_all_balloons[n]):
-    #        self.array_all_wavs.append(str(n+1) + "-" + str(k+1))
-
     self.array_all_wavs = ["{}-{}".format(n+1,k+1) for n in range(len(ocr_text["splited_frames"])) for k in range(self.array_all_balloons[n]) ]
 
-
-    #for n in range(len(ocr_text["splited_frames"])):
-    #        for k in range(self.array_all_balloons[n]):
-    #            self.texts.append(ocr_text["splited_frames"][n]["extracted_balloons"][k]["texts"]["text"])
 
     self.texts = [ocr_text["splited_frames"][n]["extracted_balloons"][k]["texts"]["text"] for n in range(len(ocr_text["splited_frames"])) for k in range(self.array_all_balloons[n])]
 

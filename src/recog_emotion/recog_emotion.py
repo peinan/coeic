@@ -45,6 +45,13 @@ class EmotionRecognizer:
 
 
   def output_result(self, result):
+    job_result = {
+        'job_name': '[{}: {}]'.format(self.__class__.__name__,\
+                                      os.path.split(__file__)[-1]),
+        'status': 'SUCCEEDED',
+        'message': ''
+    }
+    result['job_result'] = job_result
     try:
       print(json.dumps(result, ensure_ascii=False))
     except:
