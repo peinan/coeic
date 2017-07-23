@@ -44,7 +44,7 @@ class OcrTexts:
 
     try:
       img_root_dir = os.path.split(self.extracted_balloons['upload_img_path'])[0]
-      frames = self.extracted_balloons['splited_frames']
+      frames = self.extracted_balloons['splitted_frames']
     except:
       self.output_error('load data', traceback.format_exc())
 
@@ -73,7 +73,7 @@ class OcrTexts:
       self.output_error('ocr all images', traceback.format_exc())
 
     ocred_texts = self.extracted_balloons
-    ocred_texts['splited_frames'] = frame_results
+    ocred_texts['splitted_frames'] = frame_results
 
     self.output_result(ocred_texts)
 

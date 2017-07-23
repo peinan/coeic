@@ -7,7 +7,7 @@
 
 
 import sys
-import subprocess
+import subprocess, json
 
 
 class ModuleManager:

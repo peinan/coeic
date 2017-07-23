@@ -145,7 +145,7 @@ class FrameSplitter:
     print(
       json.dumps({
         'upload_img_path': self.upload_img_fp,
-        'splited_frames': cropped_result
+        'splitted_frames': cropped_result
       })
     )
 
@@ -162,12 +162,12 @@ class FrameSplitter:
     sys.exit(-1)
 
 
-def sample():
-  upload_img_fp = 'sample_data/upload_img_01/original.png'
+def main():
+  upload_img_fp = sys.argv[1]
   frame_splitter = FrameSplitter(upload_img_fp)
   frame_splitter.main()
 
 
 if __name__ == '__main__':
-  sample()
+  main()
 
