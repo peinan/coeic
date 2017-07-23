@@ -62,7 +62,7 @@ const storage = multer.diskStorage({
     cb(null, uploaded_img_root);
   },
   filename: function (req, file, cb) {
-    cb(null, new Date().getTime() + ".jpg");
+    cb(null, Date.now() + ".jpg");
   }
 });
 const upload = multer({storage: storage});
@@ -161,7 +161,7 @@ app.get("/api/uploadedImg", function (req, res) {
 app.get("/api/uploadedImg/:id", function (req, res, next) {
   try {
     // DBから画像情報取得
-    db.select(req.params.id).then(function (results) {
+    db.selectById(req.params.id).then(function (results) {
       const info_list = results.map(function (r) {
         return {
           id: r.id,
@@ -338,4 +338,53 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
       });
     }
   });
+});
+
+/**
+ * 処理済みの画像の情報を更新
+ */
+app.post("/api/processedData", function (req, res, next) {
+
+  const body = req.body;
+  const path = require('path');
+
+  try {
+    // 成功か失敗か判定
+    const status = body['status'];
+    var progress = db.STATUS_DONE;
+    var message = '';
+    if (status !== 'succeeded') {
+      progress = db.STATUS_FAILED;
+      message = body['message'];
+    }
+
+    // bodyから元画像ファイルの名前を取得
+    const upload_img_name = path.basename(body['upload_img_path']);
+
+    // DBから元画像ファイルのidを取得して，その情報を更新する
+    db.updateByName(upload_img_name, progress, message).then(
+      res.send({
+        status: 'success',
+        result: {
+          message: 'information update succeeded'
+        }
+      })
+    ).catch(function (err) {
+      console.log(err);
+      res.send({
+        status: 'failure',
+        result: {
+          message: 'information update failed'
+        }
+      })
+    });
+  } catch (e) {
+    console.log(e);
+    res.send({
+      status: "failure",
+      result: {
+        message: 'information update failed'
+      }
+    });
+  }
 });

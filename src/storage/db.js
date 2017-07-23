@@ -65,7 +65,7 @@ module.exports = {
   /**
    * select image by id
    */
-  select: function (id) {
+  selectById: function (id) {
     return new Promise(function (resolve, reject) {
       pool.getConnection(function (err, connection) {
         connection.query({
@@ -82,9 +82,28 @@ module.exports = {
   },
 
   /**
+   * select image by name
+   */
+  selectByName: function (filename) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection(function (err, connection) {
+        connection.query({
+          sql: 'SELECT * FROM `uploaded_imgs` WHERE filename = ?;',
+          timeout: 60000,
+          values: [filename]
+        }, function (error, results) {
+          connection.release();
+          if (error) return reject(error);
+          resolve(results);
+        })
+      });
+    });
+  },
+
+  /**
    * select specified status images
    */
-  selectStatus: function (status) {
+  selectByStatus: function (status) {
     return new Promise(function (resolve, reject) {
       pool.getConnection(function (err, connection) {
         connection.query({
@@ -172,6 +191,25 @@ module.exports = {
           sql: 'UPDATE `uploaded_imgs` SET status = ?,  message = ?, updated_at = NOW() WHERE id = ?',
           timeout: 60000,
           values: [status, message, id]
+        }, function (error, results) {
+          connection.release();
+          if (error) return reject(error);
+          resolve(results);
+        })
+      });
+    });
+  },
+
+  /**
+   * update status, message and updated time by name
+   */
+  updateByName: function (filename, status, message) {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection(function (err, connection) {
+        connection.query({
+          sql: 'UPDATE `uploaded_imgs` SET status = ?,  message = ?, updated_at = NOW() WHERE filename = ?',
+          timeout: 60000,
+          values: [status, message, filename]
         }, function (error, results) {
           connection.release();
           if (error) return reject(error);
