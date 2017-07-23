@@ -6,12 +6,12 @@ if (process.argv.length < 3) {
 
 const storage_root = process.argv[2].endsWith("/") ? process.argv[2] : process.argv[2] + "/";
 const upload_img_root = storage_root + "uploaded_imgs/";
-const img_root = storage_root + "processed_imgs/";
+const processed_img_root = storage_root + "processed_imgs/";
 const voice_root = storage_root + "voice/";
 
 const base_url = "http://104.155.222.216:5000/api/";
 const upload_img_url = base_url + "uploadedImg/";
-const img_url = base_url + "processedImg/";
+const processed_img_url = base_url + "processedImg/";
 const voice_url = base_url + "voice/";
 
 const express = require('express');
@@ -34,8 +34,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     cb(null, new Date().getTime() + ".jpg");
-  },
-  preservePath: new Date().getTime() + ".jpg"
+  }
 });
 const upload = multer({storage: storage});
 
@@ -198,9 +197,9 @@ app.get("/api/processedImg/:id", function (req, res) {
   var result;
 
   try {
-    var paths = walkSync(img_root + req.params.id);
+    var paths = walkSync(processed_img_root + req.params.id);
     paths = paths.map(function (name) {
-      return img_url + req.params.id + "/" + name;
+      return processed_img_url + req.params.id + "/" + name;
     });
     result = {
       status: "success",
@@ -228,7 +227,7 @@ app.get("/api/processedImg/:id/:name", function (req, res) {
   const fileExists = require('file-exists');
 
   const options = {
-    root: img_root + req.params.id + "/"
+    root: processed_img_root + req.params.id + "/"
   };
 
   const filename = req.params.name;
