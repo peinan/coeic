@@ -4,6 +4,8 @@ if (process.argv.length < 5) {
   throw Error("Usage: " + process.argv.join(" ") + " <storage_root_path> <python_command> <script_name>")
 }
 
+require('console-stamp')(console, '[yyyy-mm-dd HH:MM:ss.l]');
+
 const db = require('./db');
 
 // 実際に保存されるストレージのルート
