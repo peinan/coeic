@@ -7,7 +7,15 @@
 
 
 import sys, traceback, os, json
-from PIL import Image
+try:
+  from PIL import Image
+except:
+  print(json.dumps(
+    {'job_name': '[BalloonExtractor: load modules]',
+      'status': 'FAILED',
+      'message': traceback.format_exc()}
+  ))
+  sys.exit(-1)
 
 
 class BalloonExtractor:
@@ -19,8 +27,8 @@ class BalloonExtractor:
 
 
   def main(self):
-    frame_img_fps = self.splitted_frames['splitted_frames']
-    result = self.extract_balloons(frame_img_fps)
+    frame_img_fns = self.splitted_frames['splitted_frames']
+    result = self.extract_balloons(frame_img_fns)
 
     self.output_result(result)
 
@@ -36,7 +44,6 @@ class BalloonExtractor:
 
   def extract_balloons(self, frame_img_fns):
     # TODO: use dummy data for now
-    # TODO: output balloon image
     splitted_frames = []
     for frame_img_fn in frame_img_fns:
       frame_img_fp = os.path.join(self.coeic_root_path,\

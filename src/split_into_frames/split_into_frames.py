@@ -14,7 +14,7 @@ try:
   import numpy as np
 except:
   print(json.dumps(
-    {'job_name': '[Load modules: load modules]',
+    {'job_name': '[FrameSplitter: load modules]',
       'status': 'FAILED',
       'message': traceback.format_exc()}
   ))
