@@ -27,7 +27,7 @@ cron.schedule('*/10 * * * * *', function(){
   // DBに接続して次に処理すべき画像があるかチェックし，あれば処理を起動
   db.selectNext().then(function (results) {
     if (results.length === 0) {
-      console.log("nothing to do")
+      console.log("nothing to do");
       return;
     }
 
@@ -35,7 +35,7 @@ cron.schedule('*/10 * * * * *', function(){
 
     // DBを更新する
     db.update(to_be_processed.id, db.STATUS_DOING, to_be_processed.message).then(function (results) {
-      console.log("update info of " + to_be_processed.filename)
+      console.log("update info of " + to_be_processed.filename);
       console.log("DB update succeeded: " + db.STATUS_DOING);
     }).catch(function (err) {
       console.log("DB update failed. reason: " + err.toString());
@@ -45,7 +45,7 @@ cron.schedule('*/10 * * * * *', function(){
     const img_path = uploaded_img_root + to_be_processed.filename;
 
     // run python script
-    cmd.get('/path/to/python python_script.py ' + img_path,
+    cmd.get('/Users/jsato/.pyenv/versions/3.5.3/bin/python ./test.py ' + img_path,
       function (err, stdout, stderr) {
 
         if (!err) {
@@ -57,11 +57,10 @@ cron.schedule('*/10 * * * * *', function(){
 
             // 成功か失敗か判定
             const status = data.job_result.status;
-            var progress = db.STATUS_DONE;
-            var message = '';
+            const message = stdout;
+            let progress = db.STATUS_DONE;
             if (status !== 'SUCCEEDED') {
               progress = db.STATUS_FAILED;
-              message = data.job_result.message;
             }
 
             // DBの情報を更新する
