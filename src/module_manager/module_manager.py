@@ -11,7 +11,7 @@ import subprocess, json
 
 
 class ModuleManager:
-  PYTHON_PATH = os.path.join(os.getenv['HOME'], ".pyvenv/default/bin/python")
+  PYTHON_PATH = os.path.join(os.getenv('HOME'), ".pyvenv/default/bin/python")
 
   def __init__(self, upload_img_fp, coeic_root_path):
     self.upload_img_fp   = upload_img_fp
