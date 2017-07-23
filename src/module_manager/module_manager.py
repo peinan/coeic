@@ -24,61 +24,58 @@ class ModuleManager:
     result_recog    = self.recog_emotion(result_ocr)
     # result_generate = self.generate_speech(result_recog)
 
-    result = result_recog
+    result = result_split
 
     self.output_result(result)
 
 
   def split_into_frames(self):
-    script = self.build_script('split_into_frames', self.upload_img_fp)
-    result = self.run_shell_script(script)
+    result = self.run_shell_script('split_into_frames', self.upload_img_fp)
     self.check_result(result)
 
     return result
 
 
   def extract_balloons(self, in_json):
-    script = self.build_script('extract_balloons', in_json)
-    result = self.run_shell_script(script)
+    result = self.run_shell_script('extract_balloons', in_json)
     self.check_result(result)
 
     return result
 
 
   def ocr_texts(self, in_json):
-    script = self.build_script('ocr_texts', in_json)
-    result = self.run_shell_script(script)
+    result = self.run_shell_script('ocr_texts', in_json)
     self.check_result(result)
 
     return result
 
 
   def recog_emotion(self, in_json):
-    script = self.build_script('recog_emotion', in_json)
-    result = self.run_shell_script(script)
+    result = self.run_shell_script('recog_emotion', in_json)
     self.check_result(result)
 
     return result
 
 
   def generate_speech(self, in_json):
-    script = self.build_script('generate_speech', in_json)
-    result = self.run_shell_script(script)
+    result = self.run_shell_script('generate_speech', in_json)
     self.check_result(result)
 
     return result
 
 
-  def build_script(self, method_name, arg):
+  def run_shell_script(self, method_name, arg):
     method_fp = os.path.join(self.coeic_root_path,\
                              'src',\
                              method_name,\
                              "{}.py".format(method_name))
-    return "python {} '{}'".format(method_fp, arg)
 
+    process = subprocess.run(['python', method_fp, arg],\
+                             stdout=subprocess.PIPE,\
+                             stderr=subprocess.PIPE)
+    result = process.stdout.decode('utf-8')
 
-  def run_shell_script(self, script):
-    return subprocess.check_output(script, shell=True, universal_newlines=True)
+    return result
 
 
   def check_result(self, result_json):

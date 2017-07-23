@@ -149,8 +149,9 @@ class OcrTexts:
       'status': 'FAILED',
       'message': message
     }
+    result = {'job_result': error}
     # json serialize
-    print(json.dumps(error, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False))
     sys.exit(-1)
 
 

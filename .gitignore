@@ -106,3 +106,6 @@ ENV/
 # Vim
 *.swp
 *.swo
+
+# temp
+tmp/

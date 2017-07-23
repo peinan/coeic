@@ -58,6 +58,18 @@ class EmotionRecognizer:
       self.output_error('output result', traceback.format_exc())
 
 
+  def output_error(self, method_name, message):
+    # build error message
+    error = {
+      'job_name': "[{}: {}]".format(self.__class__.__name__, method_name),
+      'status': 'FAILED',
+      'message': message
+    }
+    # json serialize
+    print(json.dumps(error, ensure_ascii=False))
+    sys.exit(-1)
+
+
 def main():
   in_json = sys.argv[1]
   coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]

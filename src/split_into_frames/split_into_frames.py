@@ -28,13 +28,10 @@ class FrameSplitter:
 
 
   def main(self):
-    try:
-      frame_positions = self.detect_frames()
-      cropped_result = self.crop_frames(frame_positions)
+    frame_positions = self.detect_frames()
+    cropped_result = self.crop_frames(frame_positions)
 
-      self.output_result(cropped_result)
-    except:
-      self.output_error('extract all frames', traceback.format_exc())
+    self.output_result(cropped_result)
 
 
   def detect_frames(self):
@@ -103,10 +100,7 @@ class FrameSplitter:
     frame_positions = []
     for c in contours:
       approx = cv2.approxPolyDP(c, 0.01*cv2.arcLength(c, True), True)
-      try:
-        frame_position = np.array(approx).reshape(4, 2)
-      except ValueError:
-        pass
+      frame_position = np.array(approx).reshape(4, 2)
       frame_positions.append(frame_position)
 
     return frame_positions
@@ -124,7 +118,7 @@ class FrameSplitter:
       frame_img_fp = os.path.join(self.coeic_root_path,\
                                   'data',\
                                   self.upload_img_dir,\
-                                  'frame',\
+                                  'frames',\
                                   img_name)
       self.write_img(cropped_img, frame_img_fp)
       cropped_results.append(img_name)
@@ -171,8 +165,9 @@ class FrameSplitter:
       'status': 'FAILED',
       'message': message
     }
+    result = {'job_result': error}
     # json serialize
-    print(json.dumps(error, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False))
     sys.exit(-1)
 
 
