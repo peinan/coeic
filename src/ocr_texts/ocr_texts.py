@@ -25,13 +25,15 @@ except:
 
 
 class OcrTexts:
-  CURRENT_DIR     = os.getcwd()
   FRAME_IMG_DIR   = 'frames'
   BALLOON_IMG_DIR = 'balloons'
 
 
-  def __init__(self, in_json):
+  def __init__(self, in_json, coeic_root_path):
     self.extracted_balloons = self.parse_input(in_json)
+    self.upload_img_dir = self.extracted_balloons['upload_img_path']\
+                            .rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
     # print('[DEBUG] INPUT:', self.extracted_balloons)
 
 
@@ -46,6 +48,7 @@ class OcrTexts:
       img_root_dir = os.path.split(self.extracted_balloons['upload_img_path'])[0]
       frames = self.extracted_balloons['splitted_frames']
     except:
+      print(self.extracted_balloons)
       self.output_error('load data', traceback.format_exc())
 
     frame_results = []
@@ -53,8 +56,9 @@ class OcrTexts:
       for frame in frames:
         balloon_results = []
         for balloon in frame['extracted_balloons']:
-          balloon_fp = os.path.join(self.CURRENT_DIR,\
-                                    img_root_dir,\
+          balloon_fp = os.path.join(self.coeic_root_path,\
+                                    'data',
+                                    self.upload_img_dir,\
                                     self.BALLOON_IMG_DIR,\
                                     balloon)
           ocr_result = self.ocr_image(balloon_fp)
@@ -145,8 +149,9 @@ class OcrTexts:
 
 
 def main():
-  sys.argv[1]
-  ocr = OcrTexts(sys.argv[1])
+  in_json = sys.argv[1]
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  ocr = OcrTexts(in_json, coeic_root_path)
   ocr.main()
 
 

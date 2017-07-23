@@ -7,11 +7,15 @@
 
 
 import sys, traceback, os, json
+from PIL import Image
 
 
 class BalloonExtractor:
-  def __init__(self, in_json):
+  def __init__(self, in_json, coeic_root_path):
     self.splitted_frames = self.parse_input(in_json)
+    self.upload_img_dir = self.splitted_frames['upload_img_path']\
+                            .rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
 
 
   def main(self):
@@ -30,18 +34,39 @@ class BalloonExtractor:
     return splitted_frames
 
 
-  def extract_balloons(self, frame_img_fps):
+  def extract_balloons(self, frame_img_fns):
     # TODO: use dummy data for now
+    # TODO: output balloon image
     splitted_frames = []
-    for frame_img_fp in frame_img_fps:
-      balloon_imgs = [frame_img_fp]
-      splitted_frames.append({'frame_img': frame_img_fp,\
+    for frame_img_fn in frame_img_fns:
+      frame_img_fp = os.path.join(self.coeic_root_path,\
+                                  'data',\
+                                  self.upload_img_dir,\
+                                  'frames',\
+                                  frame_img_fn)
+      balloon_img_fn = "{}_01.png".format(frame_img_fn.split('.')[0])
+      balloon_img_fp = os.path.join(self.coeic_root_path,\
+                                  'data',\
+                                  self.upload_img_dir,\
+                                  'balloons',\
+                                  balloon_img_fn)
+
+      balloon_imgs = [balloon_img_fn]
+      self.write_img(Image.open(frame_img_fp), balloon_img_fp)
+      splitted_frames.append({'frame_img': frame_img_fn,\
                               'extracted_balloons': balloon_imgs})
 
     result = {'upload_img_path': self.splitted_frames['upload_img_path'],
               'splitted_frames': splitted_frames}
 
     return result
+
+
+  def write_img(self, img, out_fp):
+    img_dir = os.path.split(out_fp)[0]
+    if not os.path.isdir(img_dir):
+      os.makedirs(img_dir)
+    img.save(out_fp, 'PNG')
 
 
   def output_result(self, result):
@@ -53,7 +78,8 @@ class BalloonExtractor:
 
 def main():
   in_json = sys.argv[1]
-  balloon_extractor = BalloonExtractor(in_json)
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  balloon_extractor = BalloonExtractor(in_json, coeic_root_path)
   balloon_extractor.main()
 
 

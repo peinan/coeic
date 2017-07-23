@@ -1,11 +1,11 @@
 {
-  "upload_img_path": "sample_data/upload_img_01/original.png",
+  "upload_img_path": "/Users/Peinan/Programming/coeic/data/upload_img_01/original.png",
   "splitted_frames": [
-    "sample_data/upload_img_01/frames/01.png",
-    "sample_data/upload_img_01/frames/02.png",
-    "sample_data/upload_img_01/frames/03.png",
-    "sample_data/upload_img_01/frames/04.png",
-    "sample_data/upload_img_01/frames/05.png",
-    "sample_data/upload_img_01/frames/06.png"
+    "01.png",
+    "02.png",
+    "03.png",
+    "04.png",
+    "05.png",
+    "06.png"
   ]
 }

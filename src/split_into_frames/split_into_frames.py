@@ -21,8 +21,10 @@ except:
   sys.exit(-1)
 
 class FrameSplitter:
-  def __init__(self, upload_img_fp):
+  def __init__(self, upload_img_fp, coeic_root_path):
     self.upload_img_fp = upload_img_fp
+    self.upload_img_dir = upload_img_fp.rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
 
 
   def main(self):
@@ -118,9 +120,14 @@ class FrameSplitter:
       box = self.generate_box(rev_pos[i])
       cropped_img = orig_img.crop(box)
 
-      frame_img_fp = "sample_data/upload_img_01/frames/{:02d}.png".format(i+1)
+      img_name = '{:02d}.png'.format(i+1)
+      frame_img_fp = os.path.join(self.coeic_root_path,\
+                                  'data',\
+                                  self.upload_img_dir,\
+                                  'frame',\
+                                  img_name)
       self.write_img(cropped_img, frame_img_fp)
-      cropped_results.append(frame_img_fp)
+      cropped_results.append(img_name)
 
     return cropped_results
 
@@ -164,7 +171,8 @@ class FrameSplitter:
 
 def main():
   upload_img_fp = sys.argv[1]
-  frame_splitter = FrameSplitter(upload_img_fp)
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  frame_splitter = FrameSplitter(upload_img_fp, coeic_root_path)
   frame_splitter.main()
 
 

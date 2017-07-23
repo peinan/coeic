@@ -11,18 +11,22 @@ import subprocess, json
 
 
 class ModuleManager:
-  def __init__(self, upload_img_fp):
+  def __init__(self, upload_img_fp, coeic_root_path):
     self.upload_img_fp = upload_img_fp
+    self.upload_img_dir = upload_img_fp.rsplit('/', 2)[1]
+    self.coeic_root_path = coeic_root_path
 
 
   def main(self):
     result_split    = self.split_into_frames()
     result_extract  = self.extract_balloons(result_split)
     result_ocr      = self.ocr_texts(result_extract)
-    result_recog    = self.recog_emotion(result_ocr)
-    result_generate = self.generate_speech(result_recog)
+    # result_recog    = self.recog_emotion(result_ocr)
+    # result_generate = self.generate_speech(result_recog)
 
-    self.output_result(result_generate)
+    result = result_ocr
+
+    self.output_result(result)
 
 
   def split_into_frames(self):
@@ -87,7 +91,8 @@ class ModuleManager:
 
 def main():
   upload_img_fp = sys.argv[1]
-  module_manager = ModuleManager(upload_img_fp)
+  coeic_root_path = os.path.abspath(__file__).rsplit('/', 3)[0]
+  module_manager = ModuleManager(upload_img_fp, coeic_root_path)
   module_manager.main()
 
 
