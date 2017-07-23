@@ -77,12 +77,12 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
   try {
     // 最新の画像ファイル名を取得
     const filename =
-      Math.max.apply(null, walkSync(uploaded_img_root).map(function (name, index, array) {
+      Math.max.apply(null, walkSync(uploaded_img_root).map(function (name) {
       return name.split(".")[0];
     })).toString() + '.jpg';
 
     // DBにデータ追加
-    db.insert(filename, db.STATUS_TODO, '').then(function (results) {
+    db.insert(filename, db.STATUS_TODO, '').then(function () {
       // 追加した最新のデータを返す
       db.selectMulti(1).then(function (results) {
         const result = results[0];
@@ -231,10 +231,10 @@ app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
 app.get("/api/processedImg/:id", function (req, res) {
   const walkSync = require('walk-sync');
 
-  var result;
+  let result;
 
   try {
-    var paths = walkSync(processed_img_root + req.params.id);
+    let paths = walkSync(processed_img_root + req.params.id);
     paths = paths.map(function (name) {
       return processed_img_path_url + req.params.id + "/" + name;
     });
@@ -289,10 +289,10 @@ app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
 app.get("/api/voice/:id", function (req, res) {
   const walkSync = require('walk-sync');
 
-  var result;
+  let result;
 
   try {
-    var paths = walkSync(voice_root + req.params.id);
+    let paths = walkSync(voice_root + req.params.id);
     paths = paths.map(function (name) {
       return voice_path_url + req.params.id + "/" + name;
     });
@@ -345,7 +345,7 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
  */
 app.get("/api/truncate", function (req, res) {
   db.truncate().then(function () {
-    console.log("succeeded to truncate table")
+    console.log("succeeded to truncate table");
     res.send({
       status: 'success'
     });

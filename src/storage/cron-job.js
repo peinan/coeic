@@ -34,7 +34,7 @@ cron.schedule('*/10 * * * * *', function(){
     const to_be_processed = results[0];
 
     // DBを更新する
-    db.update(to_be_processed.id, db.STATUS_DOING, to_be_processed.message).then(function (results) {
+    db.update(to_be_processed.id, db.STATUS_DOING, to_be_processed.message).then(function () {
       console.log("update info of " + to_be_processed.filename);
       console.log("DB update succeeded: " + db.STATUS_DOING);
     }).catch(function (err) {
@@ -46,7 +46,7 @@ cron.schedule('*/10 * * * * *', function(){
 
     // run python script
     cmd.get('/Users/jsato/.pyenv/versions/3.5.3/bin/python ./test.py ' + img_path,
-      function (err, stdout, stderr) {
+      function (err, stdout) {
 
         if (!err) {
           console.log("data from python script: " + stdout);
@@ -64,7 +64,7 @@ cron.schedule('*/10 * * * * *', function(){
             }
 
             // DBの情報を更新する
-            console.log("update info of " + to_be_processed.filename)
+            console.log("update info of " + to_be_processed.filename);
             db.updateByName(to_be_processed.filename, progress, message).then(function (results) {
               console.log("DB update succeeded: " + progress);
             }).catch(function (err) {
@@ -72,7 +72,7 @@ cron.schedule('*/10 * * * * *', function(){
             });
           } catch (e) {
             console.log("data parse failed: " + e);
-            console.log("update info of " + to_be_processed.filename)
+            console.log("update info of " + to_be_processed.filename);
             db.updateByName(to_be_processed.filename, db.STATUS_FAILED, e.stack).then(function (results) {
               console.log("DB update succeeded: " + db.STATUS_FAILED);
             }).catch(function (err) {
@@ -81,7 +81,7 @@ cron.schedule('*/10 * * * * *', function(){
           }
         } else {
           console.log("python script cmd error: " + err);
-          console.log("update info of " + to_be_processed.filename)
+          console.log("update info of " + to_be_processed.filename);
           db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err.toString()).then(function (results) {
             console.log("DB update succeeded: " + db.STATUS_FAILED);
           }).catch(function (err) {
