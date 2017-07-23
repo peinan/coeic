@@ -31,6 +31,24 @@ const bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+/**
+ * Cross-Origin Resource Sharingを有効にする記述（HTTPレスポンスヘッダの追加）
+ */
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Max-Age', '86400');
+  next();
+});
+
+/**
+ * OPTIONSメソッドの実装
+ */
+app.options('*', function (req, res) {
+  res.sendStatus(200);
+});
 
 const server = app.listen(5000, function () {
   console.log("Node.js is listening to PORT:" + server.address().port);
@@ -54,7 +72,6 @@ const upload = multer({storage: storage});
  * https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_POST:uploadedImg
  */
 app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   try {
@@ -97,13 +114,11 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
   }
 });
 
-
 /**
  * get all of uploaded images info
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   try {
     const results = typeof req.body["results"] !== 'undefined' ? req.body["results"] : 0;
 
@@ -144,7 +159,6 @@ app.get("/api/uploadedImg", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:uploadedImg">wiki</a>
  */
 app.get("/api/uploadedImg/:id", function (req, res, next) {
-  res.header('Access-Control-Allow-Origin','*');
   try {
     // DBから画像情報取得
     db.select(req.params.id).then(function (results) {
@@ -188,7 +202,6 @@ app.get("/api/uploadedImg/:id", function (req, res, next) {
  * get the specified uploaded image data
  */
 app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
@@ -216,7 +229,6 @@ app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
 app.get("/api/processedImg/:id", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   var result;
@@ -248,7 +260,6 @@ app.get("/api/processedImg/:id", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
 app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
@@ -276,7 +287,6 @@ app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
 app.get("/api/voice/:id", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const walkSync = require('walk-sync');
 
   var result;
@@ -308,7 +318,6 @@ app.get("/api/voice/:id", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
 app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
-  res.header('Access-Control-Allow-Origin','*');
   const fileExists = require('file-exists');
 
   const options = {
