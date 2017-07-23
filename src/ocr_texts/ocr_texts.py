@@ -94,6 +94,8 @@ class OcrTexts:
 
 
   def certify_google_api(self):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] =\
+        os.path.join(self.coeic_root_path, 'conf/gcp_setting.json')
     self.credentials = GoogleCredentials.get_application_default()
     self.vision_client = vision.Client()
 
