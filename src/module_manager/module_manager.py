@@ -33,35 +33,35 @@ class ModuleManager:
 
   def split_into_frames(self):
     result = self.run_shell_script('split_into_frames', self.upload_img_fp)
-    self.check_result(result)
+    self.check_result('split_into_frames', result)
 
     return result
 
 
   def extract_balloons(self, in_json):
     result = self.run_shell_script('extract_balloons', in_json)
-    self.check_result(result)
+    self.check_result('extract_balloons', result)
 
     return result
 
 
   def ocr_texts(self, in_json):
     result = self.run_shell_script('ocr_texts', in_json)
-    self.check_result(result)
+    self.check_result('ocr_texts', result)
 
     return result
 
 
   def recog_emotion(self, in_json):
     result = self.run_shell_script('recog_emotion', in_json)
-    self.check_result(result)
+    self.check_result('recog_emotion', result)
 
     return result
 
 
   def generate_speech(self, in_json):
     result = self.run_shell_script('generate_speech', in_json)
-    self.check_result(result)
+    self.check_result('generate_speech', result)
 
     return result
 
@@ -80,8 +80,11 @@ class ModuleManager:
     return result
 
 
-  def check_result(self, result_json):
-    result = json.loads(result_json)
+  def check_result(self, method_name, result_json):
+    try:
+      result = json.loads(result_json)
+    except:
+      self.output_error('check result: {}'.format(method_name), result_json)
     if result['job_result']['status'] != 'SUCCEEDED':
       print(result)
       sys.exit(-1)

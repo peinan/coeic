@@ -6,7 +6,7 @@
 # Created at: 2017-07-24
 
 
-import os, sys, json, datetime, subprocess
+import os, sys, json, datetime, subprocess, time
 import requests
 
 
@@ -50,6 +50,7 @@ class SpeechGenerator:
                                          config,\
                                          frames[i]['extracted_balloons'][j]['balloon_img'])
         frames[i]['extracted_balloons'][j]['texts']['speech'] = speech_fn
+        time.sleep(1)
 
     result = self.recoged_emotion
     result['splitted_frames'] = frames
@@ -91,7 +92,6 @@ class SpeechGenerator:
   def generate_ssml(self, text, config):
     xml = """<?xml version="1.0" encoding="utf-8" ?><speak version="1.1"><voice name="{speaker}"><prosody rate="{rate}" pitch="{pitch}" range="{range}">{text}</prosody></voice></speak>""".format(**config, text=text)
     xml = xml.encode('utf-8')
-    print(xml)
 
     return xml
 
