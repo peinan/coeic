@@ -32,6 +32,7 @@ class ModuleManager:
   def split_into_frames(self):
     script = self.build_script('split_into_frames', self.upload_img_fp)
     result = self.run_shell_script(script)
+    self.check_result(result)
 
     return result
 
@@ -39,6 +40,7 @@ class ModuleManager:
   def extract_balloons(self, in_json):
     script = self.build_script('extract_balloons', in_json)
     result = self.run_shell_script(script)
+    self.check_result(result)
 
     return result
 
@@ -46,6 +48,7 @@ class ModuleManager:
   def ocr_texts(self, in_json):
     script = self.build_script('ocr_texts', in_json)
     result = self.run_shell_script(script)
+    self.check_result(result)
 
     return result
 
@@ -53,6 +56,7 @@ class ModuleManager:
   def recog_emotion(self, in_json):
     script = self.build_script('recog_emotion', in_json)
     result = self.run_shell_script(script)
+    self.check_result(result)
 
     return result
 
@@ -60,6 +64,7 @@ class ModuleManager:
   def generate_speech(self, in_json):
     script = self.build_script('generate_speech', in_json)
     result = self.run_shell_script(script)
+    self.check_result(result)
 
     return result
 
@@ -74,6 +79,13 @@ class ModuleManager:
 
   def run_shell_script(self, script):
     return subprocess.check_output(script, shell=True, universal_newlines=True)
+
+
+  def check_result(self, result_json):
+    result = json.loads(result_json)
+    if result['job_result']['status'] != 'SUCCEEDED':
+      print(result)
+      sys.exit(-1)
 
 
   def output_result(self, result):
