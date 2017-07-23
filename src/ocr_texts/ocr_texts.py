@@ -17,9 +17,11 @@ try:
   from google.cloud import vision
 except:
   print(json.dumps(
-    {'job_name': '[OcrTexts: load modules]',
-      'status': 'FAILED',
-      'message': traceback.format_exc()}
+    {'job_result':
+      {'job_name': '[OcrTexts: load modules]',
+        'status': 'FAILED',
+        'message': traceback.format_exc()}
+    }
   ))
   sys.exit(-1)
 

@@ -7,9 +7,7 @@
 
 # coding: utf-8
 
-import base64
-import os
-import json
+import base64, os, json
 import requests
 
 
