@@ -1,7 +1,7 @@
 'use strict';
 
-if (process.argv.length < 3) {
-  throw Error("Usage: " + process.argv.join(" ") + " <storage_root_path>")
+if (process.argv.length < 5) {
+  throw Error("Usage: " + process.argv.join(" ") + " <storage_root_path> <python_command> <script_name>")
 }
 
 const db = require('./db');
@@ -14,6 +14,12 @@ const uploaded_img_relative_path = "uploaded_imgs/";
 
 // 画像保存先
 const uploaded_img_root = storage_root + uploaded_img_relative_path;
+
+// python command
+const python = process.argv[3];
+
+// python script
+const script = process.argv[4];
 
 const cron = require('node-cron');
 const cmd  = require('node-cmd');
@@ -45,7 +51,7 @@ cron.schedule('*/10 * * * * *', function(){
     const img_path = uploaded_img_root + to_be_processed.filename;
 
     // run python script
-    cmd.get('/Users/jsato/.pyenv/versions/3.5.3/bin/python ./test.py ' + img_path,
+    cmd.get(python + ' ' + script + ' ' + img_path,
       function (err, stdout) {
 
         if (!err) {
