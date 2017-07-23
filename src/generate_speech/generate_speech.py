@@ -157,9 +157,11 @@ class SpeechGenerator:
   def output_error(self, method_name, message):
     # build error message
     error = {
-      'job_name': "[{}: {}]".format(self.__class__.__name__, method_name),
-      'status': 'FAILED',
-      'message': message
+      'job_result': {
+        'job_name': "[{}: {}]".format(self.__class__.__name__, method_name),
+        'status': 'FAILED',
+        'message': message
+      }
     }
     # json serialize
     print(json.dumps(error, ensure_ascii=False))
