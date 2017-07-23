@@ -178,12 +178,12 @@ app.get("/api/uploadedImg/:id", function (req, res, next) {
             message: "画像が存在しません"
           }
         });
-        next();
+      } else {
+        res.send({
+          status: "success",
+          result: info_list[0]
+        })
       }
-      res.send({
-        status: "success",
-        result: info_list[0]
-      })
     }).catch(function (err) {
       throw err;
     });
