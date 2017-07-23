@@ -130,8 +130,9 @@ module.exports = {
    * select an idling image whose id is smallest
    */
   selectNext: function () {
+
     // 処理中の画像があるかチェック
-    const doing = new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       pool.getConnection(function (err, connection) {
         connection.query({
           sql: 'SELECT * FROM `uploaded_imgs` WHERE status = ?;',
@@ -143,29 +144,27 @@ module.exports = {
           resolve(results);
         })
       });
-    }).then(function (result) {
-      return result;
+    }).then(function (results) {
+      // 処理中の画像があれば空を返す
+      if (results.length > 0) {
+        return [];
+      }
+      // 処理待ちの画像で最もidが若いものを探して返す
+      return new Promise(function (resolve, reject) {
+        pool.getConnection(function (err, connection) {
+          connection.query({
+            sql: 'SELECT * FROM `uploaded_imgs` WHERE status = ? ORDER BY id LIMIT 1;',
+            timeout: 60000,
+            values: [STATUS_TODO]
+          }, function (error, results) {
+            connection.release();
+            if (error) return reject(error);
+            resolve(results);
+          })
+        });
+      });
     }).catch(function (err) {
       throw err;
-    });
-    // 処理中の画像があれば空を返す
-    if (doing.length > 0) {
-      return [];
-    }
-
-    // 処理待ちの画像で最もidが若いものを探して返す
-    return new Promise(function (resolve, reject) {
-      pool.getConnection(function (err, connection) {
-        connection.query({
-          sql: 'SELECT * FROM `uploaded_imgs` WHERE status = ? ORDER BY id LIMIT 1;',
-          timeout: 60000,
-          values: [STATUS_TODO]
-        }, function (error, results) {
-          connection.release();
-          if (error) return reject(error);
-          resolve(results);
-        })
-      });
     });
   },
 
