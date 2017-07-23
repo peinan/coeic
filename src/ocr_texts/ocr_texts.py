@@ -30,8 +30,8 @@ class OcrTexts:
   BALLOON_IMG_DIR = 'balloons'
 
 
-  def __init__(self, in_json_fp):
-    self.extracted_balloons = self.parse_input(in_json_fp)
+  def __init__(self, in_json):
+    self.extracted_balloons = self.parse_input(in_json)
     # print('[DEBUG] INPUT:', self.extracted_balloons)
 
 
@@ -78,13 +78,13 @@ class OcrTexts:
     self.output_result(ocred_texts)
 
 
-  def parse_input(self, in_json_fp):
+  def parse_input(self, in_json):
     try:
-      in_json = json.load(open(in_json_fp, 'r'))
+      extracted_balloons = json.loads(in_json)
     except:
-      self.error_handling('parse_input', traceback.format_exc())
+      self.output_error('parse_input', traceback.format_exc())
 
-    return in_json
+    return extracted_balloons
 
 
   def certify_google_api(self):
@@ -144,11 +144,11 @@ class OcrTexts:
     sys.exit(-1)
 
 
-def sample():
-  json_fp = 'dummy_extracted_balloons.json'
-  ocr = OcrTexts(json_fp)
+def main():
+  sys.argv[1]
+  ocr = OcrTexts(sys.argv[1])
   ocr.main()
 
 
 if __name__ == '__main__':
-  sample()
+  main()
