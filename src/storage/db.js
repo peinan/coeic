@@ -27,7 +27,7 @@ pool.getConnection(function (err, connection) {
     '  `id`         INTEGER PRIMARY KEY AUTO_INCREMENT,' +
     '  `filename`   VARCHAR(255),' +
     '  `status`     VARCHAR(255),' +
-    '  `message`    VARCHAR(255),' +
+    '  `message`    LONG VARCHAR,' +
     '  `created_at` DATETIME NOT NULL,' +
     '  `updated_at` DATETIME NOT NULL' +
     ');', function (error) {

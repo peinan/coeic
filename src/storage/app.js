@@ -229,30 +229,37 @@ app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
 app.get("/api/processedImg/:id", function (req, res) {
-  const walkSync = require('walk-sync');
-
-  let result;
-
-  try {
-    let paths = walkSync(processed_img_root + req.params.id);
-    paths = paths.map(function (name) {
-      return processed_img_path_url + req.params.id + "/" + name;
-    });
-    result = {
-      status: "success",
-      result: paths
+  // DBから指定されたidのmessageを取得してDONEであればjsonとみなしてパース
+  const id = req.params.id;
+  db.selectById(id).then((results) => {
+    if (results.length !== 0 && results[0].status === db.STATUS_DONE) {
+      const result = results[0];
+      const message = result.message;
+      const data = JSON.parse(message);
+      const processed_img_urls = data.splited_frames.map((f) => {
+        return processed_img_path_url + id + '/' + f.frame_img;
+      });
+      res.send({
+        status: 'success',
+        result: processed_img_urls
+      });
+    } else {
+      res.send({
+        status: "failure",
+        result: {
+          message: "指定されたidの処理済み画像はありません: " + id
+        }
+      });
     }
-  } catch (e) {
-    result = {
+  }).catch((err) => {
+    console.log(err);
+    res.send({
       status: "failure",
       result: {
-        message: "画像取得に失敗しました",
-        cause: e
+        message: "画像取得に失敗しました"
       }
-    }
-  }
-
-  res.send(result);
+    });
+  });
 });
 
 /**
