@@ -45,7 +45,7 @@ cron.schedule('*/1 * * * * *', function(){
 
     // run python script
     cmd.get(python + ' ' + script + ' ' + img_path,
-      function (err, stdout) {
+      function (err, stdout, stderr) {
 
         if (!err) {
           console.log("data from python script: " + stdout);
@@ -79,9 +79,9 @@ cron.schedule('*/1 * * * * *', function(){
             });
           }
         } else {
-          console.log("python script cmd error: " + err);
+          console.log("python script cmd error: " + err + stderr);
           console.log("update info of " + to_be_processed.filename);
-          db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err.toString()).then(function () {
+          db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err + stderr).then(function () {
             console.log("DB update succeeded: " + db.STATUS_FAILED);
           }).catch(function (err) {
             console.log("DB update failed: " + err);
