@@ -12,7 +12,7 @@ if __name__ == '__main__':
             'message': 'error message here'
         },
         'upload_img_path': sys.argv[1],
-        'splited_frames': [
+        'splitted_frames': [
             {
                 'frame_img': 'img-1.png',
                 'extracted_balloons': [

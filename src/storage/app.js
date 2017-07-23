@@ -236,7 +236,7 @@ app.get("/api/processedImg/:id", function (req, res) {
       const result = results[0];
       const message = result.message;
       const data = JSON.parse(message);
-      const processed_img_urls = data.splited_frames.map((f) => {
+      const processed_img_urls = data.splitted_frames.map((f) => {
         return processed_img_path_url + id + '/' + f.frame_img;
       });
       res.send({
