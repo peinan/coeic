@@ -9,12 +9,6 @@ const db = require('./db');
 // 実際に保存されるストレージのルート
 const storage_root = process.argv[2].endsWith("/") ? process.argv[2] : process.argv[2] + "/";
 
-// 画像保存先の相対パス
-const uploaded_img_relative_path = "uploaded_imgs/";
-
-// 画像保存先
-const uploaded_img_root = storage_root + uploaded_img_relative_path;
-
 // python command
 const python = process.argv[3];
 
@@ -48,7 +42,7 @@ cron.schedule('*/10 * * * * *', function(){
     });
 
     // パスを生成
-    const img_path = uploaded_img_root + to_be_processed.filename;
+    const img_path = storage_root + to_be_processed.id + '/' + to_be_processed.filename;
 
     // run python script
     cmd.get(python + ' ' + script + ' ' + img_path,

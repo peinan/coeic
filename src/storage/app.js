@@ -9,23 +9,11 @@ const db = require('./db');
 // 実際に保存されるストレージのルート
 const storage_root = process.argv[2].endsWith("/") ? process.argv[2] : process.argv[2] + "/";
 
-// それぞれの相対パス
-const uploaded_img_relative_path = "uploaded_imgs/";
-const processed_img_relative_path = "processed_imgs/";
-const voice_relative_path = "voices/";
-
-// それぞれの保存先
-const uploaded_img_root = storage_root + uploaded_img_relative_path;
-const processed_img_root = storage_root + processed_img_relative_path;
-const voice_root = storage_root + voice_relative_path;
+// 一時保存ディレクトリ名
+const tmp_dir = storage_root + 'tmp/';
 
 // APIのベースURL
 const base_url = "http://104.155.222.216:5000/";
-
-// 実際の画像にアクセスするためのURL
-const uploaded_img_path_url = base_url + uploaded_img_relative_path;
-const processed_img_path_url = base_url + processed_img_relative_path;
-const voice_path_url = base_url + voice_relative_path;
 
 const express = require('express');
 const app = express();
@@ -59,58 +47,82 @@ const server = app.listen(5000, function () {
 const multer = require('multer');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploaded_img_root);
+    cb(null, tmp_dir);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + ".jpg");
+    const path = require('path');
+    const ext = path.extname(file.originalname);
+    cb(null, 'original' + ext);
   }
 });
 const upload = multer({storage: storage});
+
+/**
+ * 返送用メッセージ作成
+ * @param status  'success' or 'failure'
+ * @param message message
+ * @returns {{status: *, result: {message: *}}}
+ */
+function createMessage(status, message) {
+  return {
+    status: status,
+    result: {
+      message: message
+    }
+  }
+}
 
 /**
  * upload image
  * https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_POST:uploadedImg
  */
 app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
+
   const walkSync = require('walk-sync');
+  const path = require('path');
 
   try {
-    // 最新の画像ファイル名を取得
-    const filename =
-      Math.max.apply(null, walkSync(uploaded_img_root).map(function (name) {
-      return name.split(".")[0];
-    })).toString() + '.jpg';
-
-    // DBにデータ追加
-    db.insert(filename, db.STATUS_TODO, '').then(function () {
-      // 追加した最新のデータを返す
-      db.selectMulti(1).then(function (results) {
+    // filename取得
+    const filename = walkSync(tmp_dir).filter((name) => name.startsWith('original'))[0];
+    // まずDBに追加
+    db.insert(filename, db.STATUS_DOING, '').then(() => {
+      // DBからID取得
+      db.selectMulti(1).then((results) => {
         const result = results[0];
-        res.send({
-          status: "success",
-          result: {
-            id: result.id,
-            url: uploaded_img_path_url + result.filename,
-            status: result.status,
-            created_at: result.created_at,
-            updated_at: result.updated_at
-          }
+        // 一時保存ディレクトリをid名に移動
+        const mv = require('mv');
+        mv(tmp_dir, storage_root + result.id, (err) => {
+          console.log('mv failed: ' + err);
+          res.send(createMessage('failure', 'ディレクトリの移動に失敗'))
+        });
+        // DB情報を更新
+        db.update(result.id, db.STATUS_TODO, '').then(() => {
+          // 追加した最新のデータを返す
+          res.send({
+            status: "success",
+            result: {
+              id: result.id,
+              url: base_url + result.id + "/" + filename,
+              status: db.STATUS_TODO,
+              created_at: result.created_at,
+              updated_at: result.updated_at
+            }
+          })
+        }).catch((e) => {
+          console.log(e);
+          res.send(createMessage('failure', 'DBの初回情報更新に失敗'))
         })
-      }).catch(function (err) {
-        throw err;
+      }).catch((e) => {
+        console.log(e);
+        res.send(createMessage('failure', 'DBからの最新情報取得に失敗'))
       })
-    }).catch(function (err) {
-      throw err;
+    }).catch((e) => {
+      console.log(e);
+      res.send(createMessage('failure', 'DBへの初回登録に失敗'))
     });
-
   } catch (e) {
     console.log(e);
-    res.send({
-      status: "failure",
-      result: {
-        message: "画像のアップロードに失敗しました"
-      }
-    });
+    res.send(createMessage('failure', '画像のアップロードに失敗'))
   }
 });
 
@@ -120,17 +132,17 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
  */
 app.get("/api/uploadedImg", function (req, res) {
   try {
-    const results = typeof req.body["results"] !== 'undefined' ? req.body["results"] : 0;
+    const param = typeof req.body["results"] !== 'undefined' ? req.body["results"] : 0;
 
     // body.resultsが未指定または0の場合は全ての画像を取得（とはいえ上限を設けておく）
-    const max_num = results === 0 ? 65535 : results;
+    const max_num = param === 0 ? 65535 : param;
 
     // DBから画像情報取得
-    db.selectMulti(max_num).then(function (results) {
-      const info_list = results.map(function (r) {
+    db.selectMulti(max_num).then((results) => {
+      const info_list = results.map((r) => {
         return {
           id: r.id,
-          url: uploaded_img_path_url + r.filename,
+          url: base_url + r.id + "/" + r.filename,
           status: r.status,
           created_at: r.created_at,
           updated_at: r.updated_at
@@ -140,17 +152,13 @@ app.get("/api/uploadedImg", function (req, res) {
         status: "success",
         result: info_list
       })
-    }).catch(function (err) {
-      throw err;
+    }).catch((e) => {
+      console.log(e);
+      res.send(createMessage('failure', 'DBからの画像情報取得に失敗'))
     });
   } catch (e) {
     console.log(e);
-    res.send({
-      status: "failure",
-      result: {
-        message: "画像取得に失敗しました"
-      }
-    });
+    res.send(createMessage('failure', '画像情報取得に失敗'))
   }
 });
 
@@ -161,65 +169,52 @@ app.get("/api/uploadedImg", function (req, res) {
 app.get("/api/uploadedImg/:id", function (req, res) {
   try {
     // DBから画像情報取得
-    db.selectById(req.params.id).then(function (results) {
+    db.selectById(req.params.id).then((results) => {
       const info_list = results.map(function (r) {
         return {
           id: r.id,
-          url: uploaded_img_path_url + r.filename,
+          url: base_url + r.id + "/" + r.filename,
           status: r.status,
           created_at: r.created_at,
           updated_at: r.updated_at
         }
       });
       if (info_list.length === 0) {
-        res.send({
-          status: "failure",
-          result: {
-            message: "画像が存在しません"
-          }
-        });
+        res.send(createMessage('failure', 'DBに画像情報が存在しません'))
       } else {
         res.send({
           status: "success",
           result: info_list[0]
         })
       }
-    }).catch(function (err) {
-      throw err;
+    }).catch((e) => {
+      console.log(e);
+      res.send(createMessage('failure', 'DBからの画像情報取得に失敗'))
     });
   } catch (e) {
     console.log(e);
-    res.send({
-      status: "failure",
-      result: {
-        message: "画像取得に失敗しました"
-      }
-    });
+    res.send(createMessage('failure', '画像情報取得に失敗'))
   }
 });
 
 /**
  * get the specified uploaded image data
  */
-app.get("/" + uploaded_img_relative_path + ":name", function (req, res) {
+app.get("/:id/:name", function (req, res) {
   const fileExists = require('file-exists');
 
   const options = {
-    root: uploaded_img_root
+    root: storage_root + req.params.id
   };
 
   const filename = req.params.name;
 
-  fileExists(filename, options, function (err, exists) {
+  fileExists(filename, options, (err, exists) => {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      res.send({
-        status: "failure",
-        result: {
-          message: "画像取得に失敗しました"
-        }
-      });
+      console.log(err);
+      res.send(createMessage('failure', '画像取得失敗'));
     }
   });
 });
@@ -237,28 +232,18 @@ app.get("/api/processedImg/:id", function (req, res) {
       const message = result.message;
       const data = JSON.parse(message);
       const processed_img_urls = data.splitted_frames.map((f) => {
-        return processed_img_path_url + id + '/' + f.frame_img;
+        return base_url + id + '/frames/' + f.frame_img;
       });
       res.send({
         status: 'success',
         result: processed_img_urls
       });
     } else {
-      res.send({
-        status: "failure",
-        result: {
-          message: "指定されたidの処理済み画像はありません: " + id
-        }
-      });
+      res.send('failure', "指定されたidの処理済み画像はありません: " + id);
     }
-  }).catch((err) => {
-    console.log(err);
-    res.send({
-      status: "failure",
-      result: {
-        message: "画像取得に失敗しました"
-      }
-    });
+  }).catch((e) => {
+    console.log(e);
+    res.send('failure', '画像取得に失敗しました');
   });
 });
 
@@ -266,11 +251,11 @@ app.get("/api/processedImg/:id", function (req, res) {
  * get the processed image
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:processedImg">wiki</a>
  */
-app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
+app.get("/:id/frames/:name", function (req, res) {
   const fileExists = require('file-exists');
 
   const options = {
-    root: processed_img_root + req.params.id + "/"
+    root: storage_root + req.params.id + "/frames/"
   };
 
   const filename = req.params.name;
@@ -279,12 +264,7 @@ app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      res.send({
-        status: "failure",
-        result: {
-          message: "画像取得に失敗しました"
-        }
-      });
+      res.send('failure', '処理画像取得に失敗しました');
     }
   });
 });
@@ -294,41 +274,43 @@ app.get("/" + processed_img_relative_path + ":id/:name", function (req, res) {
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
 app.get("/api/voice/:id", function (req, res) {
-  const walkSync = require('walk-sync');
 
-  let result;
+  const flatten = require('flatten');
 
-  try {
-    let paths = walkSync(voice_root + req.params.id);
-    paths = paths.map(function (name) {
-      return voice_path_url + req.params.id + "/" + name;
-    });
-    result = {
-      status: "success",
-      result: paths
+  const id = req.params.id;
+  db.selectById(id).then((results) => {
+    if (results.length !== 0 && results[0].status === db.STATUS_DONE) {
+      const result = results[0];
+      const message = result.message;
+      const data = JSON.parse(message);
+      const voice_urls = data.splitted_frames.map((f) => {
+        return f.extracted_balloons.map((b) => {
+          return base_url + id + "/voice/" + b.texts.speech;
+        });
+      });
+      res.send({
+        status: 'success',
+        result: flatten(voice_urls)
+      });
+    } else {
+      res.send('failure', "指定されたidの音声はありません: " + id);
     }
-  } catch (e) {
-    result = {
-      status: "failure",
-      result: {
-        message: "音声取得に失敗しました",
-        cause: e
-      }
-    }
-  }
-
-  res.send(result);
+  }).catch((e) => {
+    console.log(e);
+    res.send('failure', '音声取得に失敗しました');
+  });
 });
 
 /**
  * get the voice file
  * <a href="https://github.com/peinan/coeic/wiki/API%E4%BB%95%E6%A7%98_GET:voice">wiki</a>
  */
-app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
+app.get("/:id/voice/:name", function (req, res) {
+
   const fileExists = require('file-exists');
 
   const options = {
-    root: voice_root + req.params.id + "/"
+    root: storage_root + req.params.id + "/voice/"
   };
 
   const filename = req.params.name;
@@ -337,12 +319,7 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      res.send({
-        status: "failure",
-        result: {
-          message: "音声取得に失敗しました"
-        }
-      });
+      res.send('failure', '音声取得に失敗しました');
     }
   });
 });
@@ -352,15 +329,11 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
  */
 app.get("/api/truncate", function (req, res) {
   db.truncate().then(function () {
-    console.log("succeeded to truncate table");
-    res.send({
-      status: 'success'
-    });
-  }).catch(function (err) {
-    console.log(err);
-    res.send({
-      status: 'failure',
-      message: 'failed to truncate table: ' + err
-    })
+    const message = 'succeeded to truncate table';
+    console.log(message);
+    res.send('success', message);
+  }).catch(function (e) {
+    console.log(e);
+    res.send('failure', 'failed to truncate table: ' + e);
   })
 });
