@@ -26,7 +26,7 @@ class ModuleManager:
     result_recog    = self.recog_emotion(result_ocr)
     # result_generate = self.generate_speech(result_recog)
 
-    result = result_split
+    result = result_recog
 
     self.output_result(result)
 
