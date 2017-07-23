@@ -339,3 +339,21 @@ app.get("/" + voice_relative_path + ":id/:name", function (req, res) {
     }
   });
 });
+
+/**
+ * テーブルの要素を全て削除する
+ */
+app.get("/api/truncate", function (req, res) {
+  db.truncate().then(function () {
+    console.log("succeeded to truncate table")
+    res.send({
+      status: 'success'
+    });
+  }).catch(function (err) {
+    console.log(err);
+    res.send({
+      status: 'failure',
+      message: 'failed to truncate table: ' + err
+    })
+  })
+});

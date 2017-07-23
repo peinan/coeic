@@ -223,5 +223,23 @@ module.exports = {
         })
       });
     });
+  },
+
+  /**
+   * delete all rows
+   */
+  truncate: function () {
+    return new Promise(function (resolve, reject) {
+      pool.getConnection(function (err, connection) {
+        connection.query({
+          sql: 'TRUNCATE TABLE `uploaded_imgs`',
+          timeout: 60000
+        }, function (error, results) {
+          connection.release();
+          if (error) return reject(error);
+          resolve(results);
+        })
+      });
+    });
   }
 }
