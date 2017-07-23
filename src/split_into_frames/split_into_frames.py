@@ -111,6 +111,15 @@ class FrameSplitter:
   def crop_frames(self, frame_positions):
     cropped_results = []
     rev_pos = list(reversed(frame_positions))
+
+
+    frame_number = [x for x in range(len(frame_positions))]
+
+    migiueno_junban = [frame_positions[i][3][0] - frame_positions[i][3][1] for i in frame_number]
+    a = list(reversed(np.argsort(migiueno_junban)))
+
+    rev_pos = [frame_positions[x] for x in a]
+
     orig_img = Image.open(self.upload_img_fp)
     for i in range(len(frame_positions)):
       box = self.generate_box(rev_pos[i])
