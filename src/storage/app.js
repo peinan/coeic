@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 });
 app.use((req, res, next) => {
   mkdirp(tmp_dir, (e) => {
-    if (e) console.log(e);
+    if (e) console.error(e);
   });
   next();
 });
@@ -104,14 +104,14 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
         const directoryExists = require('directory-exists');
         if (directoryExists.sync(id_dir)) {
           rmdir(id_dir, (err) => {
-            if (err) console.log(err);
+            if (err) console.warn(err);
           })
         }
         // 一時保存ディレクトリをid名に移動
         const mv = require('mv');
         mv(tmp_dir, id_dir, {mkdirp: true},  (err) => {
           if (err) {
-            console.log(err);
+            console.error(err);
             res.send(createMessage('failure', 'ディレクトリの移動に失敗'))
           } else {
             // DB情報を更新
@@ -128,21 +128,21 @@ app.post("/api/uploadedImg", upload.single('file'), function (req, res) {
                 }
               })
             }).catch((e) => {
-              console.log(e);
+              console.error(e);
               res.send(createMessage('failure', 'DBの初回情報更新に失敗'))
             });
           }
         });
       }).catch((e) => {
-        console.log(e);
+        console.error(e);
         res.send(createMessage('failure', 'DBからの最新情報取得に失敗'))
       })
     }).catch((e) => {
-      console.log(e);
+      console.error(e);
       res.send(createMessage('failure', 'DBへの初回登録に失敗'))
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', '画像のアップロードに失敗'))
   }
 });
@@ -174,11 +174,11 @@ app.get("/api/uploadedImg", function (req, res) {
         result: info_list
       })
     }).catch((e) => {
-      console.log(e);
+      console.error(e);
       res.send(createMessage('failure', 'DBからの画像情報取得に失敗'))
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', '画像情報取得に失敗'))
   }
 });
@@ -209,11 +209,11 @@ app.get("/api/uploadedImg/:id", function (req, res) {
         })
       }
     }).catch((e) => {
-      console.log(e);
+      console.error(e);
       res.send(createMessage('failure', 'DBからの画像情報取得に失敗'))
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', '画像情報取得に失敗'))
   }
 });
@@ -234,7 +234,7 @@ app.get("/:id/:name", function (req, res) {
     if (!err && exists) {
       res.sendFile(filename, options);
     } else {
-      console.log(err);
+      console.error(err);
       res.send(createMessage('failure', '画像取得失敗'));
     }
   });
@@ -263,7 +263,7 @@ app.get("/api/processedImg/:id", function (req, res) {
       res.send(createMessage('failure', "指定されたidの処理済み画像はありません: " + id));
     }
   }).catch((e) => {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', '画像取得に失敗しました'));
   });
 });
@@ -317,7 +317,7 @@ app.get("/api/voice/:id", function (req, res) {
       res.send(createMessage('failure', "指定されたidの音声はありません: " + id));
     }
   }).catch((e) => {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', '音声取得に失敗しました'));
   });
 });
@@ -354,7 +354,7 @@ app.get("/api/truncate", function (req, res) {
     console.log(message);
     res.send(createMessage('success', message));
   }).catch(function (e) {
-    console.log(e);
+    console.error(e);
     res.send(createMessage('failure', 'failed to truncate table: ' + e));
   })
 });
