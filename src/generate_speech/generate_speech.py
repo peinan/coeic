@@ -38,10 +38,6 @@ def generate_speech(ocr_texts):
         for k in range(0, array_all_balloons[n]):
             array_all_wavs.append(str(n+1) + "-" + str(k+1))
 
-
-
-
-    #TODO: [[フレーム１のバルーン], [フレーム２のバルーン], [フレーム３のバルーン]]ってやりたい
     for n in range(0,len(ocr_texts["splited_frames"])):
         for k in range(0, array_all_balloons[n]):
             texts.append(ocr_texts["splited_frames"][n]["extracted_balloons"][k]["texts"]["text"])
