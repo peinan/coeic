@@ -6,14 +6,14 @@
 # Created at: 2017-07-23
 
 
-import sys
+import sys, os
 import subprocess, json
 
 
 class ModuleManager:
   def __init__(self, upload_img_fp, coeic_root_path):
-    self.upload_img_fp = upload_img_fp
-    self.upload_img_dir = upload_img_fp.rsplit('/', 2)[1]
+    self.upload_img_fp   = upload_img_fp
+    self.upload_img_dir  = upload_img_fp.rsplit('/', 2)[1]
     self.coeic_root_path = coeic_root_path
 
 
@@ -21,7 +21,7 @@ class ModuleManager:
     result_split    = self.split_into_frames()
     result_extract  = self.extract_balloons(result_split)
     result_ocr      = self.ocr_texts(result_extract)
-    # result_recog    = self.recog_emotion(result_ocr)
+    result_recog    = self.recog_emotion(result_ocr)
     # result_generate = self.generate_speech(result_recog)
 
     result = result_ocr
@@ -43,7 +43,7 @@ class ModuleManager:
     return result
 
 
-  def orc_texts(self, in_json):
+  def ocr_texts(self, in_json):
     script = self.build_script('ocr_texts', in_json)
     result = self.run_shell_script(script)
 
@@ -65,8 +65,11 @@ class ModuleManager:
 
 
   def build_script(self, method_name, arg):
-    return "python {method_name}/{method_name}.py '{arg}'"\
-        .format(method_name=method_name, arg=arg)
+    method_fp = os.path.join(self.coeic_root_path,\
+                             'src',\
+                             method_name,\
+                             "{}.py".format(method_name))
+    return "python {} '{}'".format(method_fp, arg)
 
 
   def run_shell_script(self, script):
@@ -97,5 +100,5 @@ def main():
 
 
 if __name__ == '__main__':
-  sys.path.append(os.path.abs(__file__)).rsplit('/', 2)
+  sys.path.append(os.path.abspath(__file__).rsplit('/', 2))
   main()
