@@ -56,12 +56,12 @@ cron.schedule('*/10 * * * * *', function(){
             const path = require('path');
 
             // 成功か失敗か判定
-            const status = data.status;
+            const status = data.job_result.status;
             var progress = db.STATUS_DONE;
             var message = '';
-            if (status !== 'succeeded') {
+            if (status !== 'SUCCEEDED') {
               progress = db.STATUS_FAILED;
-              message = data.message;
+              message = data.job_result.message;
             }
 
             // DBの情報を更新する
