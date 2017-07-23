@@ -22,7 +22,6 @@ const cmd  = require('node-cmd');
  * 処理をキックするcron job
  */
 cron.schedule('*/1 * * * * *', function(){
-  console.log('start job : running a task every 10 seconds');
 
   // DBに接続して次に処理すべき画像があるかチェックし，あれば処理を起動
   db.selectNext().then(function (results) {
