@@ -4,6 +4,8 @@ if (process.argv.length < 3) {
   throw Error("Usage: " + process.argv.join(" ") + " <storage_root_path>")
 }
 
+require('console-stamp')(console, '[yyyy-mm-dd HH:MM:ss.l]');
+
 const db = require('./db');
 
 // 実際に保存されるストレージのルート
