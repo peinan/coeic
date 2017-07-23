@@ -39,7 +39,7 @@ cron.schedule('*/1 * * * * *', function(){
       console.log("update info of " + to_be_processed.filename);
       console.log("DB update succeeded: " + db.STATUS_DOING);
     }).catch(function (err) {
-      console.log("DB update failed. reason: " + err.toString());
+      console.error("DB update failed. reason: " + err);
     });
 
     // パスを生成
@@ -69,28 +69,28 @@ cron.schedule('*/1 * * * * *', function(){
             db.updateByName(to_be_processed.filename, progress, message).then(function () {
               console.log("DB update succeeded: " + progress);
             }).catch(function (err) {
-              console.log("DB update failed: " + err);
+              console.error("DB update failed: " + err);
             });
           } catch (e) {
-            console.log("data parse failed: " + e);
+            console.error("data parse failed: " + e);
             console.log("update info of " + to_be_processed.filename);
             db.updateByName(to_be_processed.filename, db.STATUS_FAILED, e.stack).then(function () {
               console.log("DB update succeeded: " + db.STATUS_FAILED);
             }).catch(function (err) {
-              console.log("DB update failed: " + err);
+              console.error("DB update failed: " + err);
             });
           }
         } else {
-          console.log("python script cmd error: " + err + stderr);
+          console.error("python script cmd error: " + err + stderr);
           console.log("update info of " + to_be_processed.filename);
           db.updateByName(to_be_processed.filename, db.STATUS_FAILED, err + stderr).then(function () {
             console.log("DB update succeeded: " + db.STATUS_FAILED);
           }).catch(function (err) {
-            console.log("DB update failed: " + err);
+            console.error("DB update failed: " + err);
           });
         }
       });
   }).catch(function (err) {
-    console.log("DB check failed: " + err);
+    console.error("DB check failed: " + err);
   })
 });
