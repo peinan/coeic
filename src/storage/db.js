@@ -1,5 +1,7 @@
 'use strict';
 
+process.on('unhandledRejection', console.dir);
+
 const mysql = require('mysql');
 const pool = mysql.createPool({
   connectionLimit: 10,
