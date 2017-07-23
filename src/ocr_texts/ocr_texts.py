@@ -6,13 +6,22 @@
 # Created at: 2017-07-22
 
 import json
-import requests
 import sys, io, os, traceback
 
-# google api
-from googleapiclient.discovery import build
-from oauth2client.client import GoogleCredentials
-from google.cloud import vision
+try:
+  import requests
+
+  # google api
+  from googleapiclient.discovery import build
+  from oauth2client.client import GoogleCredentials
+  from google.cloud import vision
+except:
+  print(json.dumps(
+    {'job_name': '[Load modules: load modules]',
+      'status': 'FAILED',
+      'message': traceback.format_exc()}
+  ))
+  sys.exit(-1)
 
 
 class OcrTexts:

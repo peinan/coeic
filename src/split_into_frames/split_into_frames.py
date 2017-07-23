@@ -5,10 +5,20 @@
 # Author:     Peinan ZHANG
 # Created at: 2017-07-22
 
-import cv2
-from PIL import Image
-import numpy as np
 import json
+import sys, io, os, traceback
+
+try:
+  import cv2
+  from PIL import Image
+  import numpy as np
+except:
+  print(json.dumps(
+    {'job_name': '[Load modules: load modules]',
+      'status': 'FAILED',
+      'message': traceback.format_exc()}
+  ))
+  sys.exit(-1)
 
 class FrameSplitter:
   def __init__(self, upload_img_fp):
@@ -16,14 +26,20 @@ class FrameSplitter:
 
 
   def main(self):
-    frame_positions = self.detect_frames()
-    cropped_result = self.crop_frames(frame_positions)
+    try:
+      frame_positions = self.detect_frames()
+      cropped_result = self.crop_frames(frame_positions)
 
-    self.output_result(cropped_result)
+      self.output_result(cropped_result)
+    except:
+      self.output_error('extract all frames', traceback.format_exc())
 
 
   def detect_frames(self):
-    gray_img, result_img = self.load_img_set()
+    try:
+      gray_img, result_img = self.load_img_set()
+    except:
+      self.output_error('load image set', traceback.format_exc())
     # ===> DEBUG
     # print("[DEBUG] load image: {}".format(self.upload_img_fp))
     # plt.imshow(gray_img, cmap='Greys_r')
@@ -31,11 +47,17 @@ class FrameSplitter:
     # <===
 
     # thresholding
-    ret, thresh = cv2.threshold(gray_img, 80, 255, cv2.THRESH_BINARY_INV)
+    try:
+      ret, thresh = cv2.threshold(gray_img, 80, 255, cv2.THRESH_BINARY_INV)
+    except:
+      self.output_error('1st thresholding', traceback.format_exc())
     # contours
-    _, contours, hierarchy = cv2.findContours(thresh,\
-                                              cv2.RETR_TREE,\
-                                              cv2.CHAIN_APPROX_SIMPLE)
+    try:
+      _, contours, hierarchy = cv2.findContours(thresh,\
+                                                cv2.RETR_TREE,\
+                                                cv2.CHAIN_APPROX_SIMPLE)
+    except:
+      self.output_error('1st contours', traceback.format_exc())
     # ===> DEBUG
     # rrr = cv2.imread(self.upload_img_fp)
     # for cnt in contours:
@@ -44,16 +66,22 @@ class FrameSplitter:
     # plt.show()
     # <===
     # convex hull
-    for c in contours:
-      hull = cv2.convexHull(c)
-      cv2.drawContours(result_img, [hull], -1, 255, -1)
+    try:
+      for c in contours:
+        hull = cv2.convexHull(c)
+        cv2.drawContours(result_img, [hull], -1, 255, -1)
+    except:
+      self.output_error('convex hull', traceback.format_exc())
 
     # ===> DEBUG
     # plt.imshow(result_img)
     # plt.show()
     # <===
     # detect rectangles
-    frames = self.detect_shapes(result_img)
+    try:
+      frames = self.detect_shapes(result_img)
+    except:
+      self.output_error('detect rectangles', traceback.format_exc())
 
     return frames
 
@@ -107,6 +135,9 @@ class FrameSplitter:
 
 
   def write_img(self, cropped_img, out_fp):
+    img_dir = os.path.split(out_fp)[0]
+    if not os.path.isdir(img_dir):
+      os.makedirs(img_dir)
     cropped_img.save(out_fp, 'PNG')
 
 
@@ -117,6 +148,18 @@ class FrameSplitter:
         'splited_frames': cropped_result
       })
     )
+
+
+  def output_error(self, method_name, message):
+    # build error message
+    error = {
+      'job_name': "[{}: {}]".format(self.__class__.__name__, method_name),
+      'status': 'FAILED',
+      'message': message
+    }
+    # json serialize
+    print(json.dumps(error, ensure_ascii=False))
+    sys.exit(-1)
 
 
 def sample():
