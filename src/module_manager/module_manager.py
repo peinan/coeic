@@ -11,6 +11,8 @@ import subprocess, json
 
 
 class ModuleManager:
+  PYTHON_PATH = os.path.join(os.getenv['HOME'], ".pyvenv/default/bin/python")
+
   def __init__(self, upload_img_fp, coeic_root_path):
     self.upload_img_fp   = upload_img_fp
     self.upload_img_dir  = upload_img_fp.rsplit('/', 2)[1]
@@ -70,7 +72,7 @@ class ModuleManager:
                              method_name,\
                              "{}.py".format(method_name))
 
-    process = subprocess.run(['python', method_fp, arg],\
+    process = subprocess.run([self.PYTHON_PATH, method_fp, arg],\
                              stdout=subprocess.PIPE,\
                              stderr=subprocess.PIPE)
     result = process.stdout.decode('utf-8')

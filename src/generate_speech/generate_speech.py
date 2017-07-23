@@ -5,7 +5,6 @@
 # Author:     Peinan ZHANG
 # Created at: 2017-07-23
 
-# coding: utf-8
 
 import base64, os, json
 import requests
