@@ -6,7 +6,7 @@ const pool = mysql.createPool({
   host: '35.188.103.34',
   user: 'root',
   password: 'hackday14_coeic',
-  database: 'coeic-db'
+  database: 'coeic_db'
 });
 
 /**
