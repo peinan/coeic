@@ -103,6 +103,10 @@ ENV/
 # Intellij IDEA
 .idea/
 
+# nodejs
+node_modules/
+*-lock.json
+
 # Vim
 *.swp
 *.swo
