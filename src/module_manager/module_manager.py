@@ -35,7 +35,7 @@ class ModuleManager:
   def split_into_frames(self):
     logger.debug("split_into_frames")
     result = self.run_shell_script('split_into_frames', self.upload_img_fp)
-    logger.debug("split_into_frames result:" + result)
+    logger.debug("split_into_frames result: " + result)
     self.check_result('split_into_frames', result)
 
     return result
@@ -44,7 +44,7 @@ class ModuleManager:
   def extract_balloons(self, in_json):
     logger.debug("extract_balloons")
     result = self.run_shell_script('extract_balloons', in_json)
-    logger.debug("extract_balloons result:" + result)
+    logger.debug("extract_balloons result: " + result)
     self.check_result('extract_balloons', result)
 
     return result
@@ -53,7 +53,7 @@ class ModuleManager:
   def ocr_texts(self, in_json):
     logger.debug("ocr_texts")
     result = self.run_shell_script('ocr_texts', in_json)
-    logger.debug("ocr_texts result:" + result)
+    logger.debug("ocr_texts result: " + result)
     self.check_result('ocr_texts', result)
 
     return result
@@ -62,7 +62,7 @@ class ModuleManager:
   def recog_emotion(self, in_json):
     logger.debug("recog_emotion")
     result = self.run_shell_script('recog_emotion', in_json)
-    logger.debug("recog_emotion result:" + result)
+    logger.debug("recog_emotion result: " + result)
     self.check_result('recog_emotion', result)
 
     return result
@@ -71,7 +71,7 @@ class ModuleManager:
   def generate_speech(self, in_json):
     logger.debug("generate_speech")
     result = self.run_shell_script('generate_speech', in_json)
-    logger.debug("generate_speech result:" + result)
+    logger.debug("generate_speech result: " + result)
     self.check_result('generate_speech', result)
 
     return result
@@ -146,7 +146,7 @@ if __name__ == '__main__':
       ))
   logger.addHandler(log_handler)
 
-  logger.debug("coeic_root_path:" + coeic_root_path)
+  logger.debug("coeic_root_path: " + coeic_root_path)
 
   main(coeic_root_path)
 
