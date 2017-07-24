@@ -110,3 +110,9 @@ node_modules/
 # Vim
 *.swp
 *.swo
+
+# temp
+tmp/
+conf/
+cache/
+*.log

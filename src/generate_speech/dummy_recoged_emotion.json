@@ -1,0 +1,28 @@
+{
+  "upload_img_path": "/Users/Peinan/Programming/coeic/data/upload_img_01/original.png",
+  "splitted_frames": [
+    {
+      "frame_img": "1.png",
+      "extracted_balloons": [
+        {
+          "balloon_img": "1-1.png",
+          "texts": {
+            "text": "どうも\nこんにちは!\n水野誠です\n",
+            "position": {
+              "left_upper": [
+                14,
+                7
+              ],
+              "right_bottom": [
+                286,
+                129
+              ]
+            },
+            "emotion": {}
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,12 @@
+{
+  "upload_img_path": "/Users/Peinan/Programming/coeic/data/upload_img_01/original.png",
+  "splitted_frames": [
+    {
+      "frame_img": "01.png",
+      "extracted_balloons": [
+        "01_01.png"
+      ]
+    }
+  ]
+}
+
