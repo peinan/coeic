@@ -11,15 +11,15 @@ import requests
 
 
 class SpeechGenerator:
-  API_KEY  = '5949482e6f535537576b43437261794e436c5448765555723062687537476b7a6238676d6c325a49355441'
+  API_KEY = '5949482e6f535537576b43437261794e436c5448765555723062687537476b7a6238676d6c325a49355441'
   URL = "https://api.apigw.smt.docomo.ne.jp/aiTalk/v1/textToSpeech?APIKEY=" + API_KEY
 
   TTS_CONFIG = {
       'speaker' : 'nozomi',
-      'pitch' : '1',
-      'range' : '1',
-      'rate' : '1',
-      'volume' : '1.5'
+      'pitch' : '1',          # テキストを読み上げるベースライン・ピッチ（1.0: 0.5 - 2.0）
+      'range' : '2',          # テキストを読み上げるピッチ・レンジ（1.0: 0.0 - 2.0）
+      'rate' : '1',           # テキストを読み上げる速度（1.0: 0.5 - 4.0）
+      'volume' : '0.5'        # テキストを読み上げる音量（1.0: 0.0 - 2.0）
   }
 
   def __init__(self, in_json, coeic_root_path):
@@ -75,7 +75,12 @@ class SpeechGenerator:
 
   def generate_config(self, text):
     # analyze text
-    return self.TTS_CONFIG
+    config = self.TTS_CONFIG
+    if ("!" in text) or ("！" in text):
+      config['volume'] = 2
+      config['rate'] = 0.5
+
+    return config
 
 
   def generate_speech(self, text, config, balloon_img):
