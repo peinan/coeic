@@ -21,13 +21,11 @@ class ModuleManager:
 
 
   def main(self):
-    result_split    = self.split_into_frames()
-    result_extract  = self.extract_balloons(result_split)
-    result_ocr      = self.ocr_texts(result_extract)
-    result_recog    = self.recog_emotion(result_ocr)
-    result_generate = self.generate_speech(result_recog)
-
-    result = result_generate
+    result = self.split_into_frames()
+    result = self.extract_balloons(result)
+    result = self.ocr_texts(result)
+    result = self.recog_emotion(result)
+    result = self.generate_speech(result)
 
     self.output_result(result)
 

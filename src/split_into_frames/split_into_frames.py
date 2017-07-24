@@ -89,7 +89,8 @@ class FrameSplitter:
 
   def load_img_set(self):
     img = cv2.imread(self.upload_img_fp)
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray_img = cv2.imread(self.upload_img_fp, 0)
+    # gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     return (gray_img, img)
 

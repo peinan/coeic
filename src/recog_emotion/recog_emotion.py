@@ -7,6 +7,18 @@
 
 
 import sys, traceback, os, json
+try:
+  import numpy as np
+except:
+  print(json.dumps(
+    {'job_result':
+      {'job_name': '[EmotionRecognizer: load modules]',
+        'status': 'FAILED',
+        'message': traceback.format_exc()}
+    }
+  ))
+  sys.exit(-1)
+
 
 
 class EmotionRecognizer:
@@ -25,14 +37,46 @@ class EmotionRecognizer:
 
 
   def recognize_emotion(self, frames):
+    magnitudes = []
+    for frame in frames:
+      for balloon in frame['extracted_balloons']:
+        texts = balloon['texts']
+        n_text = len(texts['text'])
+        area = self.calc_area(texts['position'])
+        magnitude = self.calc_magnitude(n_text, area)
+        magnitudes.append(magnitude)
+    magnitudes = self.softmax(np.array(magnitudes))
+
     for i in range(len(frames)):
       for j in range(len(frames[i]['extracted_balloons'])):
-        frames[i]['extracted_balloons'][j]['texts']['emotion'] = {}
+        # 本当は i と j 両方考えたほうがいいけど、balloon は実質今ないので、
+        # i のみ考えることにする
+        m = magnitudes[i]
+        frames[i]['extracted_balloons'][j]['texts']['emotion'] = {'magnitude': m}
 
     recoged_emotion = self.ocred_texts
     recoged_emotion['splitted_frames'] = frames
 
     return recoged_emotion
+
+
+  def calc_area(self, position):
+    area = (position['right_bottom'][0] - position['left_upper'][0]) *\
+           (position['right_bottom'][1] - position['left_upper'][1])
+
+    return area
+
+
+  def calc_magnitude(self, n_text, area):
+    return float(area) / n_text
+
+
+  def softmax(self, x):
+      c = np.max(x)
+      exp_x = np.exp(x-c)
+      sum_exp_x = np.sum(exp_x)
+
+      return exp_x / sum_exp_x
 
 
   def parse_input(self, in_json):
