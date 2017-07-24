@@ -111,3 +111,4 @@ ENV/
 tmp/
 conf/
 cache/
+*.log
